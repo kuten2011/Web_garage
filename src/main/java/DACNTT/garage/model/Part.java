@@ -8,14 +8,18 @@ import lombok.*;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 public class Part {
-
     @Id
-    @Column(length = 10)
+    @Column(length = 10, updatable = false)
     private String maPT;
 
+    @Column(nullable = false, length = 100)
     private String tenPT;
-    private Double donGia;
-    private Integer soLuongTon;
-}
 
+    @Column(nullable = false)
+    private Double donGia;
+
+    @Column(nullable = false)
+    private Integer soLuongTon = 0;
+}

@@ -4,15 +4,17 @@ import jakarta.persistence.*;
 import lombok.*;
 import java.time.LocalDate;
 
+// Repair.java
 @Entity
+@Getter
+@Setter
 @Table(name = "PhieuSuaChua")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 public class Repair {
-
     @Id
-    @Column(length = 10)
+    @Column(name = "maPhieu", length = 20)
     private String maPhieu;
 
     @ManyToOne
@@ -25,5 +27,7 @@ public class Repair {
 
     private LocalDate ngayLap;
     private String ghiChu;
-    private String trangThai;
+
+    @Column(columnDefinition = "VARCHAR(50) DEFAULT 'Chờ tiếp nhận'")
+    private String trangThai = "Chờ tiếp nhận";
 }

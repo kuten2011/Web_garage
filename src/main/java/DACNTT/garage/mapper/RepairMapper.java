@@ -10,4 +10,8 @@ public interface RepairMapper {
     @Mapping(source = "lichHen.maLich", target = "maLich")
     @Mapping(source = "nhanVien.maNV", target = "maNV")
     RepairDTO toRepairDTO(Repair repair);
+
+    @Mapping(source = "maLich", target = "lichHen.maLich")
+    @Mapping(source = "maNV", target = "nhanVien.maNV")
+    Repair toRepair(RepairDTO dto);
 }

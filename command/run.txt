@@ -1,0 +1,2 @@
+mvn clean package
+java "-Duser.timezone=Asia/Ho_Chi_Minh" -jar target\garage-0.0.1-SNAPSHOT.jar

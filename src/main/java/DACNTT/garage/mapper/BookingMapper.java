@@ -7,7 +7,12 @@ import org.mapstruct.Mapping;
 
 @Mapper(componentModel = "spring")
 public interface BookingMapper {
-    @Mapping(source = "khachHang.maKH", target = "maKH")
-    @Mapping(source = "xe.bienSo", target = "bienSo")
+    @Mapping(target = "maKH", expression = "java(booking.getKhachHang() != null ? booking.getKhachHang().getMaKH() : null)")
+    @Mapping(target = "hoTenKH", expression = "java(booking.getKhachHang() != null ? booking.getKhachHang().getHoTen() : null)")
+    @Mapping(target = "bienSo", expression = "java(booking.getXe() != null ? booking.getXe().getBienSo() : null)")
     BookingDTO toBookingDTO(Booking booking);
+
+    @Mapping(target = "khachHang", ignore = true)
+    @Mapping(target = "xe", ignore = true)
+    Booking toEntity(BookingDTO dto);
 }
