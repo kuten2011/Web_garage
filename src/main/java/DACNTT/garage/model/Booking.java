@@ -27,4 +27,18 @@ public class Booking {
     private LocalDate ngayHen;
     private LocalTime gioHen;
     private String trangThai;
+
+    @Transient
+    private String maKH;
+
+    @Transient
+    private String bienSo;
+
+    @PostLoad
+    @PrePersist
+    @PreUpdate
+    private void updateTransientFields() {
+        this.maKH = khachHang != null ? khachHang.getMaKH() : null;
+        this.bienSo = xe != null ? xe.getBienSo() : null;
+    }
 }

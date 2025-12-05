@@ -8,7 +8,6 @@ import AboutSection from '../components/sections/AboutSection';
 import ContactSection from '../components/sections/ContactSection';
 import Footer from '../components/layout/Footer';
 import FloatingButtons from '../components/ui/FloatingButtons';
-import BookingManager from './admin/BookingManager';
 
 export default function GarageWebsite() {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -38,10 +37,6 @@ export default function GarageWebsite() {
           <ContactSection />
           <FloatingButtons />
         </>
-      )}
-
-      {currentView === 'booking' && (
-        <BookingManager setCurrentView={setCurrentView} />
       )}
 
       <Footer />

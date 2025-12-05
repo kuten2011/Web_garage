@@ -39,9 +39,26 @@ public class BookingServiceImpl implements BookingService {
     @Override
     public Booking addBooking(Booking booking) {
         if (booking.getMaLich() == null || booking.getMaLich().trim().isEmpty()) {
-            String nextMaLich = generateNextMaLich();
-            booking.setMaLich(nextMaLich);
+            booking.setMaLich(generateNextMaLich());
         }
+
+        String maKH = booking.getMaKH() != null ? booking.getMaKH()
+                : (booking.getKhachHang() != null ? booking.getKhachHang().getMaKH() : null);
+        if (maKH == null || maKH.isBlank()) {
+            throw new RuntimeException("Mã khách hàng không được để trống!");
+        }
+        Customer customer = customerRepository.findById(maKH)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy khách hàng: " + maKH));
+        booking.setKhachHang(customer);
+
+        String bienSo = booking.getBienSo() != null ? booking.getBienSo()
+                : (booking.getXe() != null ? booking.getXe().getBienSo() : null);
+        if (bienSo == null || bienSo.isBlank()) {
+            throw new RuntimeException("Biển số xe không được để trống!");
+        }
+        Vehicle xe = vehicleRepository.findById(bienSo)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy xe biển số: " + bienSo));
+        booking.setXe(xe);
 
         return bookingRepository.save(booking);
     }

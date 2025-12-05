@@ -1,5 +1,5 @@
 import { Outlet, Link, useLocation } from "react-router-dom";
-import { Home, Calendar, Wrench, Users, Package, FileText, LogOut } from "lucide-react";
+import { Home, Calendar, Wrench, Users, Package, FileText, LogOut, Car } from "lucide-react";
 
 const menu = [
   { icon: Home, label: "Tổng quan", path: "/admin" },
@@ -7,6 +7,7 @@ const menu = [
   { icon: Wrench, label: "Phiếu sửa chữa", path: "/admin/repairs" },
   { icon: Package, label: "Phụ tùng", path: "/admin/parts" },
   { icon: Users, label: "Nhân viên & Khách", path: "/admin/staff" },
+  { icon: Car, label: "Xe", path: "/admin/vehicles" },
   { icon: FileText, label: "Báo cáo", path: "/admin/reports" },
 ];
 
