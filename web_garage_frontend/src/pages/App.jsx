@@ -11,11 +11,18 @@ import CustomerManager from "./admin/CustomerManager";
 import VehicleManager from "./admin/VehicleManager";
 import ReportManager from "./admin/ReportManager";
 
+import PaymentSuccess from "./payment/PaymentSuccess";
+import PaymentFailed from "./payment/PaymentFailed";
+
 export default function App() {
   return (
     <Router>
       <Routes>
         <Route path="/*" element={<GarageWebsite />} />
+
+        {/* Payment Routes */}
+        <Route path="/payment/success" element={<PaymentSuccess />} />
+        <Route path="/payment/failed" element={<PaymentFailed />} />
 
         <Route path="/admin" element={<AdminLayout />}>
           <Route index element={<AdminDashboard />} />
