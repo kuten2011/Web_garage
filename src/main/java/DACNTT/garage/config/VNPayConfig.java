@@ -1,0 +1,19 @@
+package DACNTT.garage.config;
+
+import lombok.Data;
+import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.stereotype.Component;
+
+@Component
+@Data
+@ConfigurationProperties(prefix = "vnpay")
+public class VNPayConfig {
+    private String tmnCode;
+    private String hashSecret;
+    private String url;
+    private String returnUrl;
+    private String ipnUrl;
+    private String version;
+    private String command;
+    private String orderType;
+}
