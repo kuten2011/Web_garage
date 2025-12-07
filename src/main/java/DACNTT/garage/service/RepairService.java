@@ -16,4 +16,6 @@ public interface RepairService {
     Repair updateStatus(String maPhieu, String trangThai);
 
     void deleteById(String maPhieu);
+
+    Repair getRepairById(String maPhieu);
 }

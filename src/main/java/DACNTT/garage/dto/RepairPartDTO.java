@@ -1,14 +1,7 @@
+// src/main/java/DACNTT/garage/dto/RepairPartDTO.java
 package DACNTT.garage.dto;
 
-import DACNTT.garage.model.Part;
-import DACNTT.garage.model.Repair;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 @NoArgsConstructor
 @AllArgsConstructor
@@ -17,6 +10,10 @@ import lombok.NoArgsConstructor;
 public class RepairPartDTO {
     private String maPhieu;
     private String maPT;
+    private String tenPT;
     private Integer soLuong;
     private Double thanhTien;
+
+    private Double donGia;
+    private Integer soLuongTon;
 }

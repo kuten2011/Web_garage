@@ -1,9 +1,10 @@
 package DACNTT.garage.service;
 
 import DACNTT.garage.model.RepairPart;
-
-import java.util.List;
+import DACNTT.garage.model.RepairPartId;
 
 public interface RepairPartService {
-    List<RepairPart> getAllRepairParts();
+    RepairPart save(RepairPart repairPart);
+    void deleteById(RepairPartId id);
+    boolean existsById(RepairPartId id);
 }

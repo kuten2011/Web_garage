@@ -86,4 +86,10 @@ public class RepairServiceImpl implements RepairService {
         }
         repairRepository.deleteById(maPhieu);
     }
+
+    @Override
+    public Repair getRepairById(String maPhieu) {
+        return repairRepository.findById(maPhieu)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy phiếu sửa chữa: " + maPhieu));
+    }
 }

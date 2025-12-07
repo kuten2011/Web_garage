@@ -5,6 +5,8 @@ import AdminDashboard from "./admin/AdminDashboard";
 import BookingManager from "./admin/BookingManager";
 
 import RepairManager from "./admin/RepairManager";
+import RepairDetail from "./admin/RepairDetail";  
+
 import PartManager from "./admin/PartManager";
 import EmployeeManager from "./admin/EmployeeManager";
 import CustomerManager from "./admin/CustomerManager";
@@ -26,8 +28,13 @@ export default function App() {
 
         <Route path="/admin" element={<AdminLayout />}>
           <Route index element={<AdminDashboard />} />
+
           <Route path="bookings" element={<BookingManager />} />
+
           <Route path="repairs" element={<RepairManager />} />
+
+          <Route path="repairParts/:maPhieu" element={<RepairDetail />} />
+
           <Route path="parts" element={<PartManager />} />
           <Route path="employees" element={<EmployeeManager />} />
           <Route path="customers" element={<CustomerManager />} />

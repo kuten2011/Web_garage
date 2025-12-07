@@ -2,8 +2,9 @@ import React, { useState, useEffect, useMemo } from "react";
 import axios from "axios";
 import {
   Plus, Search, Wrench, CalendarDays, User, Edit3, Trash2,
-  ChevronLeft, ChevronRight, ClipboardList, Car
+  ChevronLeft, ChevronRight, ClipboardList
 } from "lucide-react";
+import { Link } from "react-router-dom";
 
 const API_BASE = "http://localhost:8080/web_garage";
 const API = `${API_BASE}/repairs`;
@@ -167,14 +168,24 @@ export default function RepairManager() {
                   <th className="px-6 py-5 text-center font-semibold">Ngày Lập</th>
                   <th className="px-6 py-5 text-left font-semibold">Ghi Chú</th>
                   <th className="px-6 py-5 text-center font-semibold">Trạng Thái</th>
+                  <th className="px-6 py-5 text-center font-semibold">Xem</th>
                   <th className="px-6 py-5 text-center font-semibold">Thao Tác</th>
                 </tr>
               </thead>
+
               <tbody className="divide-y divide-gray-200">
                 {loading ? (
-                  <tr><td colSpan="7" className="text-center py-16 text-gray-500 text-lg">Đang tải dữ liệu...</td></tr>
+                  <tr>
+                    <td colSpan="8" className="text-center py-16 text-gray-500 text-lg">
+                      Đang tải dữ liệu...
+                    </td>
+                  </tr>
                 ) : filteredData.length === 0 ? (
-                  <tr><td colSpan="7" className="text-center py-16 text-gray-400 text-xl font-medium">Không có phiếu sửa chữa</td></tr>
+                  <tr>
+                    <td colSpan="8" className="text-center py-16 text-gray-400 text-xl font-medium">
+                      Không có phiếu sửa chữa
+                    </td>
+                  </tr>
                 ) : (
                   filteredData.map((r) => (
                     <tr key={r.maPhieu} className="hover:bg-indigo-50 transition">
@@ -183,7 +194,9 @@ export default function RepairManager() {
                       <td className="px-6 py-5">
                         <div className="flex items-center gap-2">
                           <ClipboardList size={18} className="text-gray-500" />
-                          <span className="font-medium">{r.maLich || <span className="text-gray-400 italic">Chưa có</span>}</span>
+                          <span className="font-medium">
+                            {r.maLich || <span className="text-gray-400 italic">Chưa có</span>}
+                          </span>
                         </div>
                       </td>
 
@@ -227,7 +240,14 @@ export default function RepairManager() {
                           <option value="Hoàn thành">Hoàn thành</option>
                         </select>
                       </td>
-
+                      <td className="px-6 py-5 text-center">
+                        <Link
+                          to={`/admin/repairParts/${r.maPhieu}`}
+                          className="text-indigo-600 hover:text-indigo-800 font-bold underline"
+                        >
+                          Xem chi tiết
+                        </Link>
+                      </td>
                       <td className="px-6 py-5 text-center">
                         <div className="flex justify-center gap-5">
                           <button
@@ -246,6 +266,7 @@ export default function RepairManager() {
                           </button>
                         </div>
                       </td>
+
                     </tr>
                   ))
                 )}
@@ -360,6 +381,7 @@ export default function RepairManager() {
             </div>
           </div>
         )}
+
       </div>
     </div>
   );

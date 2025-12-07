@@ -43,16 +43,6 @@ public class RepairHandle {
         return ResponseEntity.ok(dtoPage);
     }
 
-    public ResponseEntity<RepairDTO> getRepairById(String maPhieu) {
-        try {
-            Repair repair = repairService.findById(maPhieu);
-            return ResponseEntity.ok(repairMapper.toRepairDTO(repair));
-        } catch (RuntimeException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(null);
-        }
-    }
-
     public ResponseEntity<RepairDTO> createRepair(RepairDTO dto) {
         try {
             if (dto.getMaPhieu() != null && !dto.getMaPhieu().isBlank()) {
@@ -107,5 +97,10 @@ public class RepairHandle {
         } catch (RuntimeException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
+    }
+
+    public ResponseEntity<RepairDTO> getRepairById(String maPhieu) {
+        Repair repair = repairService.getRepairById(maPhieu);
+        return ResponseEntity.ok(repairMapper.toRepairDTO(repair));
     }
 }

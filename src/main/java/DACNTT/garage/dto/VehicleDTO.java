@@ -1,9 +1,6 @@
 package DACNTT.garage.dto;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 @NoArgsConstructor
 @AllArgsConstructor
@@ -12,6 +9,7 @@ import lombok.NoArgsConstructor;
 public class VehicleDTO {
     private String bienSo;
     private String maKH;
+    private String tenKH;        // để hiển thị tên khách
     private String hangXe;
     private String mauXe;
     private Integer soKm;

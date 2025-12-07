@@ -18,7 +18,7 @@ public class Report {
     @JoinColumn(name = "maChiNhanh")
     private Branch chiNhanh;
 
-    private String thangNam;  // VD: "2025-09"
+    private String thangNam;
     private Double doanhThu;
     private Integer soXePhucVu;
 }
