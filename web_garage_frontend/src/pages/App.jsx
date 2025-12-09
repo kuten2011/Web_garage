@@ -8,6 +8,7 @@ import RepairManager from "./admin/RepairManager";
 import RepairDetail from "./admin/RepairDetail";  
 
 import PartManager from "./admin/PartManager";
+import ServiceManager from "./admin/ServiceManager";
 import EmployeeManager from "./admin/EmployeeManager";
 import CustomerManager from "./admin/CustomerManager";
 import VehicleManager from "./admin/VehicleManager";
@@ -36,6 +37,7 @@ export default function App() {
           <Route path="repairParts/:maPhieu" element={<RepairDetail />} />
 
           <Route path="parts" element={<PartManager />} />
+          <Route path="services" element={<ServiceManager />} />
           <Route path="employees" element={<EmployeeManager />} />
           <Route path="customers" element={<CustomerManager />} />
           <Route path="vehicles" element={<VehicleManager />} />

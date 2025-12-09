@@ -7,5 +7,6 @@ import org.mapstruct.Mapper;
 
 @Mapper(componentModel = "spring")
 public interface ServiceEntityMapper {
-    ServiceEntityDTO toServiceEntityDTO(ServiceEntity serviceEntity);
+    ServiceEntityDTO toServiceEntityDTO(ServiceEntity entity);
+    ServiceEntity toEntity(ServiceEntityDTO dto);
 }
