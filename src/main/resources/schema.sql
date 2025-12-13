@@ -1,3 +1,6 @@
+-- Trong PostgreSQL
+CREATE EXTENSION IF NOT EXISTS vector;
+
 -- ===============================
 -- BẢNG CHI NHÁNH
 -- ===============================
@@ -148,3 +151,26 @@ CREATE TABLE IF NOT EXISTS "BaoCao" (
     "soXePhucVu" INTEGER,
     CONSTRAINT fk_bc_cn FOREIGN KEY ("maChiNhanh") REFERENCES "ChiNhanh"("maChiNhanh")
     );
+
+-- ===============================
+-- BẢNG THÔNG TIN DỊCH VỤ (ServiceInfo)
+-- ===============================
+CREATE TABLE IF NOT EXISTS "ThongTinDichVu" (
+    "id" SERIAL PRIMARY KEY,
+    "title" TEXT NOT NULL,
+    "description" TEXT,
+    "content" TEXT NOT NULL,
+    "category" VARCHAR(100),
+    "embedding" vector(768),
+    "created_at" TIMESTAMP NOT NULL DEFAULT NOW(),
+    "updated_at" TIMESTAMP
+    );
+
+-- Tạo index cho vector search
+CREATE INDEX embedding_idx ON "ThongTinDichVu"
+    USING ivfflat (embedding vector_cosine_ops)
+    WITH (lists = 100);
+
+-- Tạo index cho full-text search
+CREATE INDEX title_content_idx ON "ThongTinDichVu"
+    USING gin(to_tsvector('english', title || ' ' || content));
