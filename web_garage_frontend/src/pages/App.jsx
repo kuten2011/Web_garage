@@ -19,6 +19,8 @@ import FeedbackManager from "./admin/FeedbackManager";
 import PaymentSuccess from "./payment/PaymentSuccess";
 import PaymentFailed from "./payment/PaymentFailed";
 
+import Services from "./customer/Services.jsx"
+
 export default function App() {
   return (
     <Router>
@@ -28,6 +30,8 @@ export default function App() {
         {/* Payment Routes */}
         <Route path="/payment/success" element={<PaymentSuccess />} />
         <Route path="/payment/failed" element={<PaymentFailed />} />
+
+        <Route path="/services" element={<Services />} />
 
         <Route path="/admin" element={<AdminLayout />}>
           <Route index element={<AdminDashboard />} />
