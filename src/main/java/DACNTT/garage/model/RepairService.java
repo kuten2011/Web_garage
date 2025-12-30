@@ -4,17 +4,17 @@ import jakarta.persistence.*;
 import lombok.*;
 
 @Entity
-@Table(name = "CT_Lich_DichVu")
+@Table(name = "CT_SuaChua_DichVu")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@IdClass(BookingServiceId.class)
-public class BookingService {
+@IdClass(RepairServiceId.class)
+public class RepairService {
 
     @Id
     @ManyToOne
-    @JoinColumn(name = "maLich")
-    private Booking booking;
+    @JoinColumn(name = "maPhieu")
+    private Repair phieu;
 
     @Id
     @ManyToOne
@@ -23,4 +23,7 @@ public class BookingService {
 
     private Integer soLuong;
     private String ghiChu;
+
+    // THÊM FIELD NÀY – LỖI SẼ BIẾN MẤT NGAY!
+    private Double thanhTien;
 }

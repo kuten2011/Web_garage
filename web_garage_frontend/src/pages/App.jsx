@@ -13,6 +13,8 @@ import EmployeeManager from "./admin/EmployeeManager";
 import CustomerManager from "./admin/CustomerManager";
 import VehicleManager from "./admin/VehicleManager";
 import ReportManager from "./admin/ReportManager";
+import BranchManager from "./admin/BranchManager";
+import FeedbackManager from "./admin/FeedbackManager";
 
 import PaymentSuccess from "./payment/PaymentSuccess";
 import PaymentFailed from "./payment/PaymentFailed";
@@ -39,8 +41,10 @@ export default function App() {
           <Route path="parts" element={<PartManager />} />
           <Route path="services" element={<ServiceManager />} />
           <Route path="employees" element={<EmployeeManager />} />
-          <Route path="customers" element={<CustomerManager />} />
+          <Route path="staff" element={<CustomerManager />} />
           <Route path="vehicles" element={<VehicleManager />} />
+          <Route path="branches" element={<BranchManager />} />
+          <Route path="feedbacks" element={<FeedbackManager />} />
           <Route path="reports" element={<ReportManager />} />
         </Route>
       </Routes>

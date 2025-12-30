@@ -4,6 +4,7 @@ import DACNTT.garage.dto.RepairDTO;
 import DACNTT.garage.mapper.RepairMapper;
 import DACNTT.garage.model.Repair;
 import DACNTT.garage.service.RepairService;
+import org.hibernate.Hibernate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.*;
 import org.springframework.http.HttpStatus;
@@ -46,8 +47,7 @@ public class RepairHandle {
     public ResponseEntity<RepairDTO> createRepair(RepairDTO dto) {
         try {
             if (dto.getMaPhieu() != null && !dto.getMaPhieu().isBlank()) {
-                return ResponseEntity.badRequest()
-                        .body(null);
+                return ResponseEntity.badRequest().build();
             }
 
             Repair repair = repairMapper.toRepair(dto);
@@ -56,8 +56,7 @@ public class RepairHandle {
                     .body(repairMapper.toRepairDTO(saved));
 
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body(null);
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
         }
     }
 
@@ -98,7 +97,7 @@ public class RepairHandle {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
     }
-
+    
     public ResponseEntity<RepairDTO> getRepairById(String maPhieu) {
         Repair repair = repairService.getRepairById(maPhieu);
         return ResponseEntity.ok(repairMapper.toRepairDTO(repair));

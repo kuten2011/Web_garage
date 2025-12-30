@@ -1,5 +1,6 @@
 package DACNTT.garage.dto;
 
+import DACNTT.garage.model.Customer;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -19,4 +20,6 @@ public class FeedbackDTO {
     private String trangThai;
     private String maNVXL;
     private String phanHoiQL;
+
+    private Customer khachHang;
 }

@@ -6,7 +6,7 @@ import lombok.*;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class BookingServiceId implements Serializable {
-    private String booking;
+public class RepairServiceId implements Serializable {
+    private String phieu;
     private String dichVu;
 }

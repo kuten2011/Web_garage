@@ -10,4 +10,6 @@ public interface FeedbackMapper {
     @Mapping(source = "khachHang.maKH", target = "maKH")
     @Mapping(source = "nhanVienXuLy.maNV", target = "maNVXL")
     FeedbackDTO toFeedbackDTO(Feedback feedback);
+
+    Feedback toEntity(FeedbackDTO dto);
 }

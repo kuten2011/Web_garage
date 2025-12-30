@@ -1,9 +1,5 @@
 package DACNTT.garage.dto;
 
-import DACNTT.garage.model.Booking;
-import DACNTT.garage.model.Employee;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -22,4 +18,7 @@ public class RepairDTO {
     private LocalDate ngayLap;
     private String ghiChu;
     private String trangThai;
+
+    private CustomerDTO khachHang;
+    private VehicleDTO xe;
 }

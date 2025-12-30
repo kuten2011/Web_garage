@@ -9,7 +9,7 @@ import lombok.*;
 public class VehicleDTO {
     private String bienSo;
     private String maKH;
-    private String tenKH;        // để hiển thị tên khách
+    private String tenKH;
     private String hangXe;
     private String mauXe;
     private Integer soKm;
