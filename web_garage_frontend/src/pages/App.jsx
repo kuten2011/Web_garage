@@ -19,6 +19,8 @@ import FeedbackManager from "./admin/FeedbackManager";
 import PaymentSuccess from "./payment/PaymentSuccess";
 import PaymentFailed from "./payment/PaymentFailed";
 
+import ChatbotComponent from "../components/chatbot/ChatbotComponent";
+
 export default function App() {
   return (
     <Router>
