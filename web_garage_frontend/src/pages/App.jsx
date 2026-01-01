@@ -19,7 +19,10 @@ import FeedbackManager from "./admin/FeedbackManager";
 import PaymentSuccess from "./payment/PaymentSuccess";
 import PaymentFailed from "./payment/PaymentFailed";
 
+
 import Services from "./customer/Services.jsx"
+import ChatbotComponent from "../components/chatbot/ChatbotComponent";
+
 
 export default function App() {
   return (
