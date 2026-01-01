@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { Search, ChevronLeft, ChevronRight, Package, Clock, Star, ArrowLeft, AlertCircle, Filter } from "lucide-react";
 import {useNavigate} from "react-router-dom";
+import { partImages, DEFAULT_PART_IMAGE } from "../../data/partImage.js";
 
 const API = "http://localhost:8080/web_garage/parts";
 const PAGE_SIZE = 8;
@@ -294,26 +295,34 @@ export default function PartsPage() {
                                         className="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2"
                                     >
                                         {/* Card Header */}
-                                        <div className="h-40 bg-gradient-to-br from-gray-800 to-gray-900 relative overflow-hidden flex items-center justify-center">
-                                            <div className="absolute top-0 right-0 w-24 h-24 bg-yellow-400 opacity-10 rounded-full -mr-12 -mt-12"></div>
-                                            <div className="absolute bottom-0 left-0 w-20 h-20 bg-yellow-400 opacity-10 rounded-full -ml-10 -mb-10"></div>
+                                        <div
+                                            className="h-48 bg-gray-100 relative overflow-hidden flex items-center justify-center">
+                                            <img
+                                                src={partImages[part.maPT] || part.hinhAnh || DEFAULT_PART_IMAGE}
+                                                alt={part.tenPT}
+                                                className="w-full h-full object-cover"
+                                                onError={(e) => {
+                                                    e.target.onerror = null;
+                                                    e.target.src = DEFAULT_PART_IMAGE;
+                                                }}
+                                            />
 
-                                            <div className="relative text-center z-10 p-4">
-                                                <div className="flex justify-center mb-2">
-                                                    <Package className="text-yellow-400" size={32} />
-                                                </div>
-                                                <h3 className="text-lg font-bold text-white line-clamp-2">
-                                                    {part.tenPT}
-                                                </h3>
+                                            {/* Badge trạng thái */}
+                                            <div
+                                                className={`absolute top-3 right-3 px-3 py-1 rounded-full text-xs font-bold shadow-lg ${
+                                                    getStockStatus(part.soLuongTon).text === 'Còn hàng'
+                                                        ? 'bg-green-500 text-white'
+                                                        : 'bg-red-500 text-white'
+                                                }`}>
+                                                {getStockStatus(part.soLuongTon).text}
                                             </div>
-
-                                            <Star size={18} className="absolute top-3 right-3 text-yellow-400 fill-yellow-400" />
                                         </div>
 
                                         {/* Card Body */}
                                         <div className="p-5">
                                             {/* Giá tiền */}
-                                            <div className="mb-3 bg-yellow-50 p-3 rounded-lg border-2 border-yellow-200">
+                                            <div
+                                                className="mb-3 bg-yellow-50 p-3 rounded-lg border-2 border-yellow-200">
                                                 <div className="text-center">
                                                     <p className="text-xs text-gray-600 mb-1">Giá phụ tùng</p>
                                                     <p className="text-xl font-black text-red-600">
@@ -322,23 +331,16 @@ export default function PartsPage() {
                                                 </div>
                                             </div>
 
-                                            {/* Trạng thái hàng */}
-                                            <div className={`mb-3 p-3 rounded-lg border-2 ${stockStatus.bgColor} ${stockStatus.borderColor}`}>
-                                                <div className="flex items-center justify-center gap-2">
-                                                    <span className={`text-base font-bold ${stockStatus.color}`}>
-                                                        {stockStatus.text}
-                                                    </span>
-                                                </div>
-                                            </div>
 
                                             {/* Tính năng */}
-                                            <div className="flex items-center justify-center gap-3 mb-3 text-xs text-gray-500">
+                                            <div
+                                                className="flex items-center justify-center gap-3 mb-3 text-xs text-gray-500">
                                                 <div className="flex items-center gap-1">
-                                                    <Clock size={14} className="text-yellow-600" />
+                                                    <Clock size={14} className="text-yellow-600"/>
                                                     <span>Giao nhanh</span>
                                                 </div>
                                                 <div className="flex items-center gap-1">
-                                                    <Star size={14} className="text-yellow-600" />
+                                                    <Star size={14} className="text-yellow-600"/>
                                                     <span>Chính hãng</span>
                                                 </div>
                                             </div>
@@ -364,11 +366,11 @@ export default function PartsPage() {
                         {data.totalPages > 1 && (
                             <div className="flex justify-center items-center gap-3 mt-12 pb-8">
                                 <button
-                                    onClick={() => setPage(p => Math.max(0, p-1))}
-                                    disabled={page===0}
+                                    onClick={() => setPage(p => Math.max(0, p - 1))}
+                                    disabled={page === 0}
                                     className="p-3 rounded-full bg-white shadow-lg disabled:opacity-40 hover:bg-yellow-50 transition"
                                 >
-                                    <ChevronLeft size={24} />
+                                    <ChevronLeft size={24}/>
                                 </button>
 
                                 {[...Array(data.totalPages)].map((_, i) => (
@@ -376,12 +378,12 @@ export default function PartsPage() {
                                         key={i}
                                         onClick={() => setPage(i)}
                                         className={`w-12 h-12 rounded-full font-bold text-base transition-all duration-300 ${
-                                            page===i
+                                            page === i
                                                 ? "bg-yellow-400 text-gray-900 shadow-xl scale-110"
                                                 : "bg-white shadow-lg hover:bg-gray-50"
                                         }`}
                                     >
-                                        {i+1}
+                                        {i + 1}
                                     </button>
                                 ))}
 

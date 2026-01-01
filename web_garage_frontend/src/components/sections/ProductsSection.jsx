@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Package, Star, Clock } from 'lucide-react';
+import { partImages, DEFAULT_PART_IMAGE } from "../../data/partImage.js";
+
 
 const API = "http://localhost:8080/web_garage/parts";
 
@@ -73,26 +75,34 @@ export default function PartsSection({ onViewAllParts }) {
                                         className="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-2xl transition-all transform hover:-translate-y-2 cursor-pointer"
                                     >
                                         {/* Card Header */}
-                                        <div className="h-48 bg-gradient-to-br from-gray-800 to-gray-900 relative overflow-hidden flex items-center justify-center">
-                                            <div className="absolute top-0 right-0 w-32 h-32 bg-yellow-400 opacity-10 rounded-full -mr-16 -mt-16"></div>
-                                            <div className="absolute bottom-0 left-0 w-24 h-24 bg-yellow-400 opacity-10 rounded-full -ml-12 -mb-12"></div>
+                                        <div
+                                            className="h-48 bg-gray-100 relative overflow-hidden flex items-center justify-center">
+                                            <img
+                                                src={partImages[part.maPT] || DEFAULT_PART_IMAGE}
+                                                alt={part.tenPT}
+                                                className="w-full h-full object-cover"
+                                                onError={(e) => {
+                                                    e.target.onerror = null;
+                                                    e.target.src = DEFAULT_PART_IMAGE;
+                                                }}
+                                            />
 
-                                            <div className="relative text-center z-10 p-4">
-                                                <div className="flex justify-center mb-3">
-                                                    <Package className="text-yellow-400" size={40} />
-                                                </div>
-                                                <h3 className="text-xl font-bold text-white line-clamp-2">
-                                                    {part.tenPT}
-                                                </h3>
+                                            {/* Badge trạng thái */}
+                                            <div
+                                                className={`absolute top-3 right-3 px-3 py-1 rounded-full text-xs font-bold shadow-lg ${
+                                                    stockStatus.text === 'Còn hàng'
+                                                        ? 'bg-green-500 text-white'
+                                                        : 'bg-red-500 text-white'
+                                                }`}>
+                                                {stockStatus.text}
                                             </div>
-
-                                            <Star size={20} className="absolute top-3 right-3 text-yellow-400 fill-yellow-400" />
                                         </div>
 
                                         {/* Card Body */}
                                         <div className="p-6">
                                             {/* Giá tiền */}
-                                            <div className="mb-4 bg-yellow-50 p-4 rounded-lg border-2 border-yellow-200">
+                                            <div
+                                                className="mb-4 bg-yellow-50 p-4 rounded-lg border-2 border-yellow-200">
                                                 <div className="text-center">
                                                     <p className="text-sm text-gray-600 mb-1">Giá phụ tùng</p>
                                                     <p className="text-2xl font-black text-red-600">
@@ -101,21 +111,15 @@ export default function PartsSection({ onViewAllParts }) {
                                                 </div>
                                             </div>
 
-                                            {/* Trạng thái hàng - Không hiển thị số lượng */}
-                                            <div className={`mb-4 p-3 rounded-lg border-2 ${stockStatus.bgColor} ${stockStatus.borderColor}`}>
-                                                <p className={`text-sm text-center font-bold ${stockStatus.color}`}>
-                                                    {stockStatus.text}
-                                                </p>
-                                            </div>
-
                                             {/* Tính năng */}
-                                            <div className="flex items-center justify-center gap-4 mb-4 text-xs text-gray-500">
+                                            <div
+                                                className="flex items-center justify-center gap-4 mb-4 text-xs text-gray-500">
                                                 <div className="flex items-center gap-1">
-                                                    <Clock size={16} className="text-yellow-600" />
+                                                    <Clock size={16} className="text-yellow-600"/>
                                                     <span>Giao nhanh</span>
                                                 </div>
                                                 <div className="flex items-center gap-1">
-                                                    <Star size={16} className="text-yellow-600" />
+                                                    <Star size={16} className="text-yellow-600"/>
                                                     <span>Chính hãng</span>
                                                 </div>
                                             </div>
@@ -145,7 +149,8 @@ export default function PartsSection({ onViewAllParts }) {
                             >
                                 Xem tất cả phụ tùng
                                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+                                          d="M13 7l5 5m0 0l-5 5m5-5H6"/>
                                 </svg>
                             </button>
                         </div>
