@@ -49,109 +49,17 @@ ON CONFLICT ("maLich") DO NOTHING;
 
 -- 6. DỊCH VỤ
 INSERT INTO "DichVu" ("maDV", "tenDV", "giaTien", "moTa") VALUES
-<<<<<<< HEAD
 ('DV01', 'Thay dầu máy', 500000, 'Thay dầu động cơ 5W30')
 ON CONFLICT ("maDV") DO NOTHING;
 
 INSERT INTO "DichVu" ("maDV", "tenDV", "giaTien", "moTa") VALUES
 ('DV02', 'Bảo dưỡng 10.000km', 1500000, 'Kiểm tra toàn bộ xe')
 ON CONFLICT ("maDV") DO NOTHING;
-=======
--- BẢO DƯỠNG ĐỊNH KỲ
-('BD01', 'Thay dầu động cơ', 300000, 'Thay dầu và lọc dầu giúp động cơ vận hành êm và bền'),
-('BD02', 'Bảo dưỡng định kỳ 5.000km', 500000, 'Kiểm tra và bảo dưỡng các hạng mục cơ bản'),
-('BD03', 'Bảo dưỡng định kỳ 10.000km', 1200000, 'Bảo dưỡng toàn diện theo khuyến cáo hãng'),
-('BD04', 'Thay lọc gió động cơ', 200000, 'Giúp tăng hiệu suất đốt nhiên liệu'),
-('BD05', 'Thay lọc gió điều hòa', 250000, 'Giữ không khí trong xe sạch và mát'),
-
--- SỬA CHỮA ĐỘNG CƠ
-('DC01', 'Kiểm tra động cơ', 300000, 'Chẩn đoán lỗi động cơ bằng thiết bị'),
-('DC02', 'Sửa động cơ nóng máy', 800000, 'Kiểm tra két nước, quạt và bơm nước'),
-('DC03', 'Đại tu động cơ', 15000000, 'Tháo và phục hồi toàn bộ động cơ'),
-('DC04', 'Thay bugi', 400000, 'Giúp xe khởi động và đốt nhiên liệu tốt'),
-('DC05', 'Thay dây curoa', 600000, 'Đảm bảo truyền động ổn định'),
-
--- LỐP – MÂM
-('LP01', 'Vá lốp', 100000, 'Vá lốp không săm chuyên dụng'),
-('LP02', 'Thay lốp mới', 2500000, 'Thay lốp theo kích thước xe'),
-('LP03', 'Cân bằng động bánh xe', 300000, 'Giúp xe chạy êm, không rung'),
-('LP04', 'Cân chỉnh thước lái', 500000, 'Chỉnh độ chụm bánh xe'),
-('LP05', 'Đảo lốp', 200000, 'Tăng tuổi thọ lốp'),
-
--- PHANH – AN TOÀN
-('PH01', 'Kiểm tra hệ thống phanh', 300000, 'Kiểm tra bố thắng và đĩa phanh'),
-('PH02', 'Thay bố thắng', 900000, 'Đảm bảo an toàn khi phanh'),
-('PH03', 'Xả gió phanh', 300000, 'Tăng hiệu quả phanh'),
-('PH04', 'Thay dầu phanh', 400000, 'Bảo dưỡng hệ thống phanh'),
-('PH05', 'Sửa phanh ABS', 1500000, 'Chẩn đoán và sửa lỗi ABS'),
-
--- ĐIỆN – ĐIỆN TỬ
-('DD01', 'Kiểm tra hệ thống điện', 300000, 'Kiểm tra toàn bộ điện xe'),
-('DD02', 'Thay ắc quy', 1800000, 'Thay ắc quy mới chính hãng'),
-('DD03', 'Sửa hệ thống đèn', 300000, 'Đèn pha, đèn hậu, đèn tín hiệu'),
-('DD04', 'Sửa cảm biến', 800000, 'Cảm biến oxy, nhiệt độ, áp suất'),
-('DD05', 'Cài đặt lại ECU', 700000, 'Reset và cập nhật ECU'),
-
--- ĐIỀU HÒA – LÀM MÁT
-('DH01', 'Kiểm tra điều hòa', 300000, 'Kiểm tra hoạt động làm lạnh'),
-('DH02', 'Nạp gas điều hòa', 500000, 'Nạp gas đúng chuẩn'),
-('DH03', 'Vệ sinh giàn lạnh', 700000, 'Khử mùi và diệt khuẩn'),
-('DH04', 'Sửa quạt làm mát', 600000, 'Đảm bảo nhiệt độ động cơ'),
-('DH05', 'Thay két nước', 2000000, 'Thay két làm mát động cơ'),
-
--- CHĂM SÓC XE
-('CS01', 'Rửa xe tiêu chuẩn', 80000, 'Rửa ngoài và vệ sinh cơ bản'),
-('CS02', 'Rửa xe cao cấp', 150000, 'Rửa xe và vệ sinh nội thất'),
-('CS03', 'Phủ ceramic', 8000000, 'Bảo vệ sơn xe'),
-('CS04', 'Đánh bóng sơn', 3000000, 'Làm mới bề mặt sơn'),
-('CS05', 'Vệ sinh nội thất', 600000, 'Làm sạch ghế, sàn và trần'),
-
--- PHỤ KIỆN – NÂNG CẤP
-('NK01', 'Lắp camera hành trình', 1500000, 'Camera ghi hình trước và sau'),
-('NK02', 'Lắp cảm biến lùi', 1200000, 'Cảnh báo khi lùi xe'),
-('NK03', 'Lắp màn hình Android', 6000000, 'Giải trí và dẫn đường'),
-('NK04', 'Dán phim cách nhiệt', 3500000, 'Giảm nhiệt và tia UV'),
-('NK05', 'Độ đèn LED', 2000000, 'Tăng ánh sáng và thẩm mỹ'),
-
--- CỨU HỘ – KHÁC
-('CH01', 'Cứu hộ xe 24/7', 500000, 'Hỗ trợ xe gặp sự cố'),
-('CH02', 'Kéo xe', 800000, 'Kéo xe về garage'),
-('DV01', 'Kiểm tra xe trước chuyến đi', 400000, 'Kiểm tra tổng quát xe'),
-('DV02', 'Kiểm tra xe trước khi mua', 700000, 'Đánh giá tình trạng xe'),
-('DV03', 'Tư vấn kỹ thuật', 200000, 'Tư vấn sửa chữa và bảo dưỡng');
-
-
--- ===== BẢNG CT_LICH_DICHVU =====
-INSERT INTO "CT_Lich_DichVu" ("maLich", "maDV", "soLuong", "ghiChu") VALUES
-('LH01', 'BD01', 1, 'Dầu tổng hợp cao cấp, kèm thay lọc dầu'),
-('LH02', 'CS02', 1, 'Xe rất bẩn, rửa kỹ và hút bụi nội thất'),
-('LH02', 'DC04', 1, 'Thay bugi đánh lửa mới'),
-('LH03', 'PH01', 1, 'Kiểm tra phanh trước, điều chỉnh má phanh'),
-('LH03', 'BD03', 1, 'Bảo dưỡng 10.000km: dầu, lốp, ắc quy, treo');
->>>>>>> 4c2f9e5e0ae172bddb6c2f6f55a108ca2f9c9bde
 
 -- 7. PHỤ TÙNG
 INSERT INTO "PhuTung" ("maPT", "tenPT", "donGia", "soLuongTon") VALUES
-<<<<<<< HEAD
 ('PT01', 'Dầu máy 5W30', 450000, 50)
 ON CONFLICT ("maPT") DO NOTHING;
-=======
-('PT01', 'Lọc dầu', 150000, 50),
-('PT02', 'Lọc gió động cơ', 120000, 30),
-('PT03', 'Lọc nhiên liệu', 180000, 20),
-('PT04', 'Bugi đánh lửa', 100000, 40),
-('PT05', 'Má phanh', 250000, 30),
-('PT06', 'Đĩa phanh', 400000, 20),
-('PT07', 'Dầu động cơ', 350000, 60),
-('PT08', 'Dầu hộp số ATF', 500000, 25),
-('PT09', 'Phuộc nhún', 800000, 10),
-('PT10', 'Rotuyn', 150000, 15),
-('PT11', 'Lốp xe các loại', 400000, 50),
-('PT12', 'Van lốp', 50000, 100),
-('PT13', 'Gas lạnh R134a', 300000, 30),
-('PT14', 'Cầu chì', 10000, 200),
-('PT15', 'Ắc quy', 1200000, 15);
->>>>>>> 4c2f9e5e0ae172bddb6c2f6f55a108ca2f9c9bde
 
 INSERT INTO "PhuTung" ("maPT", "tenPT", "donGia", "soLuongTon") VALUES
 ('PT02', 'Lọc dầu', 250000, 30)
@@ -159,24 +67,14 @@ ON CONFLICT ("maPT") DO NOTHING;
 
 -- 8. PHIẾU SỬA CHỮA (tạo SAU khi đã có NhanVien & LichHen)
 INSERT INTO "PhieuSuaChua" ("maPhieu", "maLich", "maNV", "ngayLap", "ghiChu", "trangThai") VALUES
-<<<<<<< HEAD
 ('PSC01', 'LH01', 'NV01', '2025-10-14', 'Thay dầu + lọc', 'Chờ tiếp nhận')
 ON CONFLICT ("maPhieu") DO NOTHING;
-=======
-    ('PSC01', 'LH03', 'NV01', '2025-10-22', 'Bảo dưỡng định kỳ và thay phanh', 'Hoàn thành');
->>>>>>> 4c2f9e5e0ae172bddb6c2f6f55a108ca2f9c9bde
+
 
 -- 9. CHI TIẾT SỬA CHỮA – PHỤ TÙNG
 INSERT INTO "CT_SuaChua_PhuTung" ("maPhieu", "maPT", "soLuong", "thanhTien") VALUES
-<<<<<<< HEAD
 ('PSC01', 'PT01', 1, 450000)
 ON CONFLICT ("maPhieu", "maPT") DO NOTHING;
-=======
-('PSC01', 'PT05', 2, 500000),
-('PSC01', 'PT06', 1, 400000),
-('PSC01', 'PT07', 1, 350000),
-('PSC01', 'PT04', 4, 400000);
->>>>>>> 4c2f9e5e0ae172bddb6c2f6f55a108ca2f9c9bde
 
 INSERT INTO "CT_SuaChua_PhuTung" ("maPhieu", "maPT", "soLuong", "thanhTien") VALUES
 ('PSC01', 'PT02', 1, 250000)
@@ -194,16 +92,13 @@ ON CONFLICT ("maPhanHoi") DO NOTHING;
 
 -- 12. BÁO CÁO
 INSERT INTO "BaoCao" ("maBC", "maChiNhanh", "thangNam", "doanhThu", "soXePhucVu") VALUES
-<<<<<<< HEAD
 ('BC01', 'CN01', '10/2025', 2500000, 12)
 ON CONFLICT ("maBC") DO NOTHING;
 
 INSERT INTO "BaoCao" ("maBC", "maChiNhanh", "thangNam", "doanhThu", "soXePhucVu") VALUES
 ('BC02', 'CN02', '10/2025', 1800000, 8)
 ON CONFLICT ("maBC") DO NOTHING;
-=======
-('BC01', 'CN01', '10/2025', 2500000, 12),
-('BC02', 'CN02', '10/2025', 1800000, 8);
+
 
 -- ===============================
 -- DỮ LIỆU TỐI ƯU CHO RAG CHATBOT
@@ -699,4 +594,4 @@ INSERT INTO "ThongTinDichVu" ("title", "description", "content", "category") VAL
  - Online: garage.vn/dat-lich
  - App: Tải "Garage App"
  - Hotline: 0909 123 456', 'Câu hỏi thường gặp');
->>>>>>> 4c2f9e5e0ae172bddb6c2f6f55a108ca2f9c9bde
+
