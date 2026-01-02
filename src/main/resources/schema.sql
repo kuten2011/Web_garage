@@ -130,12 +130,8 @@ CREATE TABLE IF NOT EXISTS "BaoCao" (
     "thangNam" VARCHAR(10),
     "doanhThu" NUMERIC(14,2),
     "soXePhucVu" INTEGER,
-<<<<<<< HEAD
     CONSTRAINT fk_bc_cn FOREIGN KEY ("maChiNhanh") REFERENCES "ChiNhanh"("maChiNhanh") ON DELETE SET NULL
 );
-=======
-    CONSTRAINT fk_bc_cn FOREIGN KEY ("maChiNhanh") REFERENCES "ChiNhanh"("maChiNhanh")
-    );
 
 -- ===============================
 -- BẢNG THÔNG TIN DỊCH VỤ (ServiceInfo)
@@ -159,4 +155,4 @@ CREATE INDEX embedding_idx ON "ThongTinDichVu"
 -- Tạo index cho full-text search
 CREATE INDEX title_content_idx ON "ThongTinDichVu"
     USING gin(to_tsvector('english', title || ' ' || content));
->>>>>>> 4c2f9e5e0ae172bddb6c2f6f55a108ca2f9c9bde
+
