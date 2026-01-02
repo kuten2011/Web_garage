@@ -3,10 +3,8 @@ import GarageWebsite from "./GarageWebsite";
 import AdminLayout from "./admin/AdminLayout";
 import AdminDashboard from "./admin/AdminDashboard";
 import BookingManager from "./admin/BookingManager";
-
 import RepairManager from "./admin/RepairManager";
-import RepairDetail from "./admin/RepairDetail";  
-
+import RepairDetail from "./admin/RepairDetail";
 import PartManager from "./admin/PartManager";
 import ServiceManager from "./admin/ServiceManager";
 import EmployeeManager from "./admin/EmployeeManager";
@@ -20,6 +18,7 @@ import PaymentSuccess from "./payment/PaymentSuccess";
 import PaymentFailed from "./payment/PaymentFailed";
 
 import ChatbotComponent from "../components/chatbot/ChatbotComponent";
+import Services from "./customer/Services.jsx";
 
 export default function App() {
   return (
@@ -31,15 +30,14 @@ export default function App() {
         <Route path="/payment/success" element={<PaymentSuccess />} />
         <Route path="/payment/failed" element={<PaymentFailed />} />
 
+        {/* Customer services */}
+        <Route path="/services" element={<Services />} />
+
         <Route path="/admin" element={<AdminLayout />}>
           <Route index element={<AdminDashboard />} />
-
           <Route path="bookings" element={<BookingManager />} />
-
           <Route path="repairs" element={<RepairManager />} />
-
           <Route path="repairParts/:maPhieu" element={<RepairDetail />} />
-
           <Route path="parts" element={<PartManager />} />
           <Route path="services" element={<ServiceManager />} />
           <Route path="employees" element={<EmployeeManager />} />
@@ -50,6 +48,9 @@ export default function App() {
           <Route path="reports" element={<ReportManager />} />
         </Route>
       </Routes>
+
+      {/* Chatbot hiển thị toàn trang */}
+      <ChatbotComponent />
     </Router>
   );
 }
