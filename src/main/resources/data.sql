@@ -33,6 +33,7 @@ INSERT INTO "LichHen" ("maLich", "maKH", "bienSo", "ngayHen", "gioHen", "trangTh
 
 -- ===== BẢNG DỊCH VỤ =====
 INSERT INTO "DichVu" ("maDV", "tenDV", "giaTien", "moTa") VALUES
+<<<<<<< HEAD
 -- BẢO DƯỠNG ĐỊNH KỲ
 ('BD01', 'Thay dầu động cơ', 300000, 'Thay dầu và lọc dầu giúp động cơ vận hành êm và bền'),
 ('BD02', 'Bảo dưỡng định kỳ 5.000km', 500000, 'Kiểm tra và bảo dưỡng các hạng mục cơ bản'),
@@ -104,9 +105,18 @@ INSERT INTO "CT_Lich_DichVu" ("maLich", "maDV", "soLuong", "ghiChu") VALUES
 ('LH02', 'DC04', 1, 'Thay bugi đánh lửa mới'),
 ('LH03', 'PH01', 1, 'Kiểm tra phanh trước, điều chỉnh má phanh'),
 ('LH03', 'BD03', 1, 'Bảo dưỡng 10.000km: dầu, lốp, ắc quy, treo');
+=======
+('DV01', 'Thay dầu máy', 500000, 'Thay dầu động cơ 5W30')
+ON CONFLICT ("maDV") DO NOTHING;
+
+INSERT INTO "DichVu" ("maDV", "tenDV", "giaTien", "moTa") VALUES
+('DV02', 'Bảo dưỡng 10.000km', 1500000, 'Kiểm tra toàn bộ xe')
+ON CONFLICT ("maDV") DO NOTHING;
+>>>>>>> 39853ccdc7dd01c3a6211f37cbc694f5ffc6860c
 
 -- ===== BẢNG PHỤ TÙNG =====
 INSERT INTO "PhuTung" ("maPT", "tenPT", "donGia", "soLuongTon") VALUES
+<<<<<<< HEAD
 ('PT01', 'Lọc dầu', 150000, 50),
 ('PT02', 'Lọc gió động cơ', 120000, 30),
 ('PT03', 'Lọc nhiên liệu', 180000, 20),
@@ -122,17 +132,32 @@ INSERT INTO "PhuTung" ("maPT", "tenPT", "donGia", "soLuongTon") VALUES
 ('PT13', 'Gas lạnh R134a', 300000, 30),
 ('PT14', 'Cầu chì', 10000, 200),
 ('PT15', 'Ắc quy', 1200000, 15);
+=======
+('PT01', 'Dầu máy 5W30', 450000, 50)
+ON CONFLICT ("maPT") DO NOTHING;
+>>>>>>> 39853ccdc7dd01c3a6211f37cbc694f5ffc6860c
 
 -- ===== BẢNG PHIẾU SỬA CHỮA =====
 INSERT INTO "PhieuSuaChua" ("maPhieu", "maLich", "maNV", "ngayLap", "ghiChu", "trangThai") VALUES
+<<<<<<< HEAD
     ('PSC01', 'LH03', 'NV01', '2025-10-22', 'Bảo dưỡng định kỳ và thay phanh', 'Hoàn thành');
+=======
+('PSC01', 'LH01', 'NV01', '2025-10-14', 'Thay dầu + lọc', 'Chờ tiếp nhận')
+ON CONFLICT ("maPhieu") DO NOTHING;
+
+>>>>>>> 39853ccdc7dd01c3a6211f37cbc694f5ffc6860c
 
 -- ===== BẢNG CT_SuaChua_PhuTung =====
 INSERT INTO "CT_SuaChua_PhuTung" ("maPhieu", "maPT", "soLuong", "thanhTien") VALUES
+<<<<<<< HEAD
 ('PSC01', 'PT05', 2, 500000),
 ('PSC01', 'PT06', 1, 400000),
 ('PSC01', 'PT07', 1, 350000),
 ('PSC01', 'PT04', 4, 400000);
+=======
+('PSC01', 'PT01', 1, 450000)
+ON CONFLICT ("maPhieu", "maPT") DO NOTHING;
+>>>>>>> 39853ccdc7dd01c3a6211f37cbc694f5ffc6860c
 
 -- ===== BẢNG PHẢN HỒI =====
 INSERT INTO "PhanHoi" ("maPhanHoi", "maKH", "noiDung", "ngayGui", "trangThai", "maNVXL", "phanHoiQL") VALUES
@@ -140,8 +165,18 @@ INSERT INTO "PhanHoi" ("maPhanHoi", "maKH", "noiDung", "ngayGui", "trangThai", "
 
 -- ===== BẢNG BÁO CÁO =====
 INSERT INTO "BaoCao" ("maBC", "maChiNhanh", "thangNam", "doanhThu", "soXePhucVu") VALUES
+<<<<<<< HEAD
 ('BC01', 'CN01', '10/2025', 2500000, 12),
 ('BC02', 'CN02', '10/2025', 1800000, 8);
+=======
+('BC01', 'CN01', '10/2025', 2500000, 12)
+ON CONFLICT ("maBC") DO NOTHING;
+
+INSERT INTO "BaoCao" ("maBC", "maChiNhanh", "thangNam", "doanhThu", "soXePhucVu") VALUES
+('BC02', 'CN02', '10/2025', 1800000, 8)
+ON CONFLICT ("maBC") DO NOTHING;
+
+>>>>>>> 39853ccdc7dd01c3a6211f37cbc694f5ffc6860c
 
 -- ===============================
 -- DỮ LIỆU TỐI ƯU CHO RAG CHATBOT
