@@ -1,9 +1,9 @@
 import { useState, useEffect } from "react";
 import { Search, ChevronLeft, ChevronRight, Package, Clock, Star, ArrowLeft, AlertCircle, Filter } from "lucide-react";
 import {useNavigate} from "react-router-dom";
-import { partImages, DEFAULT_PART_IMAGE } from "../../data/partImage.js";
 
 const API = "http://localhost:8080/web_garage/parts";
+const DEFAULT_IMAGE = "https://placehold.net/400x400.png";
 const PAGE_SIZE = 8;
 
 export default function PartsPage() {
@@ -118,7 +118,7 @@ export default function PartsPage() {
     };
 
     const getStockStatus = (soLuongTon) => {
-        if (soLuongTon === 0) return {
+        if (soLuongTon <= 0) return {
             text: 'Hết hàng',
             color: 'text-red-600',
             bgColor: 'bg-red-50',
@@ -298,12 +298,12 @@ export default function PartsPage() {
                                         <div
                                             className="h-48 bg-gray-100 relative overflow-hidden flex items-center justify-center">
                                             <img
-                                                src={partImages[part.maPT] || part.hinhAnh || DEFAULT_PART_IMAGE}
+                                                src={part.hinhAnh || DEFAULT_IMAGE}
                                                 alt={part.tenPT}
                                                 className="w-full h-full object-cover"
                                                 onError={(e) => {
                                                     e.target.onerror = null;
-                                                    e.target.src = DEFAULT_PART_IMAGE;
+                                                    e.target.src = DEFAULT_IMAGE;
                                                 }}
                                             />
 

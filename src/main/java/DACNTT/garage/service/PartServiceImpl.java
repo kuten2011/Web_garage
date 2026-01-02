@@ -51,6 +51,9 @@ public class PartServiceImpl implements PartService {
         existing.setTenPT(updateData.getTenPT());
         existing.setDonGia(updateData.getDonGia());
         existing.setSoLuongTon(updateData.getSoLuongTon());
+        if (updateData.getHinhAnh() != null) {
+            existing.setHinhAnh(updateData.getHinhAnh());
+        }
         return partRepository.save(existing);
     }
 
@@ -62,7 +65,7 @@ public class PartServiceImpl implements PartService {
         partRepository.deleteById(maPT);
     }
 
-    private String generateNextMaPT() {
+    public String generateNextMaPT() {
         return partRepository.findTopByOrderByMaPTDesc()
                 .map(p -> {
                     String code = p.getMaPT();

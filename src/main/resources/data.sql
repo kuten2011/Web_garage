@@ -57,12 +57,12 @@ INSERT INTO "DichVu" ("maDV", "tenDV", "giaTien", "moTa") VALUES
 ON CONFLICT ("maDV") DO NOTHING;
 
 -- 7. PHỤ TÙNG
-INSERT INTO "PhuTung" ("maPT", "tenPT", "donGia", "soLuongTon") VALUES
-('PT01', 'Dầu máy 5W30', 450000, 50)
+INSERT INTO "PhuTung" ("maPT", "tenPT", "donGia", "soLuongTon", "hinhAnh") VALUES
+('PT01', 'Dầu máy 5W30', 450000, 50, 'https://res.cloudinary.com/web-garage/image/upload/dau-tong-hop_nxrjxy.jpg')
 ON CONFLICT ("maPT") DO NOTHING;
 
-INSERT INTO "PhuTung" ("maPT", "tenPT", "donGia", "soLuongTon") VALUES
-('PT02', 'Lọc dầu', 250000, 30)
+INSERT INTO "PhuTung" ("maPT", "tenPT", "donGia", "soLuongTon", "hinhAnh") VALUES
+('PT02', 'Lọc dầu', 250000, 30, 'https://res.cloudinary.com/web-garage/image/upload/loc-dau_n2pyj2.jpg')
 ON CONFLICT ("maPT") DO NOTHING;
 
 -- 8. PHIẾU SỬA CHỮA (tạo SAU khi đã có NhanVien & LichHen)

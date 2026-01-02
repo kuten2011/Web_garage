@@ -72,7 +72,8 @@ CREATE TABLE IF NOT EXISTS "PhuTung" (
     "maPT" VARCHAR(10) PRIMARY KEY,
     "tenPT" VARCHAR(255),
     "donGia" NUMERIC(14,2),
-    "soLuongTon" INTEGER DEFAULT 0
+    "soLuongTon" INTEGER DEFAULT 0,
+    "hinhAnh" VARCHAR(255)
 );
 
 -- BẢNG PHIẾU SỬA CHỮA (TẠO SAU NHÂN VIÊN)

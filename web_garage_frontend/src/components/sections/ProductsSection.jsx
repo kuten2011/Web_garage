@@ -1,10 +1,10 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Package, Star, Clock } from 'lucide-react';
-import { partImages, DEFAULT_PART_IMAGE } from "../../data/partImage.js";
 
 
 const API = "http://localhost:8080/web_garage/parts";
+const DEFAULT_PART_IMAGE = "https://placehold.net/400x400.png";
 
 export default function PartsSection({ onViewAllParts }) {
     const [parts, setParts] = useState([]);
@@ -29,7 +29,7 @@ export default function PartsSection({ onViewAllParts }) {
     };
 
     const getStockStatus = (soLuongTon) => {
-        if (soLuongTon === 0) return {
+        if (soLuongTon <= 0) return {
             text: 'Hết hàng',
             color: 'text-red-600',
             bgColor: 'bg-red-50',
@@ -78,7 +78,7 @@ export default function PartsSection({ onViewAllParts }) {
                                         <div
                                             className="h-48 bg-gray-100 relative overflow-hidden flex items-center justify-center">
                                             <img
-                                                src={partImages[part.maPT] || DEFAULT_PART_IMAGE}
+                                                src={part.hinhAnh || DEFAULT_PART_IMAGE}
                                                 alt={part.tenPT}
                                                 className="w-full h-full object-cover"
                                                 onError={(e) => {
