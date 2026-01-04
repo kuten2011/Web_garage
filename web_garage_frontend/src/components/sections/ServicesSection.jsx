@@ -48,7 +48,7 @@ export default function ServicesSection({ onViewAllServices }) {
                             {services.slice(0, 8).map((service) => (
                                 <div
                                     key={service.maDV}
-                                    onClick={onViewAllServices}
+                                    onClick={()=>navigate("/services")}
                                     className="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-2xl transition-all transform hover:-translate-y-2 cursor-pointer"
                                 >
                                     {/* Card Header */}

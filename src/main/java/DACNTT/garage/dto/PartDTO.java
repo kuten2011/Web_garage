@@ -14,4 +14,5 @@ public class PartDTO {
     private String tenPT;
     private Double donGia;
     private Integer soLuongTon;
+    private String hinhAnh;
 }

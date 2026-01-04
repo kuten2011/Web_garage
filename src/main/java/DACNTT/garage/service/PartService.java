@@ -20,4 +20,6 @@ public interface PartService {
             Integer stockUnder, Integer stockAbove,
             Pageable pageable
     );
+
+    String generateNextMaPT();
 }

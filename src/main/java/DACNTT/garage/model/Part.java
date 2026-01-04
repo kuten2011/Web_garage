@@ -22,4 +22,7 @@ public class Part {
 
     @Column(nullable = false)
     private Integer soLuongTon = 0;
+
+    @Column
+    private String hinhAnh;
 }

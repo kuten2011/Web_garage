@@ -18,6 +18,7 @@ import PaymentSuccess from "./payment/PaymentSuccess";
 import PaymentFailed from "./payment/PaymentFailed";
 
 import Services from "./customer/Services.jsx"
+import Parts from "./customer/Parts.jsx"
 import ChatbotComponent from "../components/chatbot/ChatbotComponent";
 
 export default function App() {
@@ -32,6 +33,7 @@ export default function App() {
 
         {/* Customer services */}
         <Route path="/services" element={<Services />} />
+        <Route path="/parts" element={<Parts />} />
 
         <Route path="/admin" element={<AdminLayout />}>
           <Route index element={<AdminDashboard />} />

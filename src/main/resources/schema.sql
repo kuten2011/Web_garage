@@ -10,7 +10,7 @@ CREATE TABLE IF NOT EXISTS "ChiNhanh" (
     "diaChi" TEXT,
     "sdt" VARCHAR(20),
     "email" VARCHAR(100)
-    );
+);
 
 -- ===============================
 -- BẢNG KHÁCH HÀNG
@@ -22,7 +22,7 @@ CREATE TABLE IF NOT EXISTS "KhachHang" (
     "email" VARCHAR(100),
     "diaChi" TEXT,
     "matKhau" VARCHAR(100)
-    );
+);
 
 -- ===============================
 -- BẢNG NHÂN VIÊN
@@ -36,7 +36,7 @@ CREATE TABLE IF NOT EXISTS "NhanVien" (
     "matKhau" VARCHAR(100),
     "maChiNhanh" VARCHAR(10),
     CONSTRAINT fk_nv_cn FOREIGN KEY ("maChiNhanh") REFERENCES "ChiNhanh"("maChiNhanh")
-    );
+);
 
 -- ===============================
 -- BẢNG XE
@@ -49,7 +49,7 @@ CREATE TABLE IF NOT EXISTS "Xe" (
     "soKm" INTEGER,
     "namSX" INTEGER,
     CONSTRAINT fk_xe_kh FOREIGN KEY ("maKH") REFERENCES "KhachHang"("maKH")
-    );
+);
 
 -- ===============================
 -- BẢNG LỊCH HẸN
@@ -63,7 +63,7 @@ CREATE TABLE IF NOT EXISTS "LichHen" (
     "trangThai" VARCHAR(50),
     CONSTRAINT fk_lich_kh FOREIGN KEY ("maKH") REFERENCES "KhachHang"("maKH"),
     CONSTRAINT fk_lich_xe FOREIGN KEY ("bienSo") REFERENCES "Xe"("bienSo")
-    );
+);
 
 -- ===============================
 -- BẢNG DỊCH VỤ
@@ -73,7 +73,7 @@ CREATE TABLE IF NOT EXISTS "DichVu" (
     "tenDV" VARCHAR(100),
     "giaTien" NUMERIC(12,2),
     "moTa" TEXT
-    );
+);
 
 -- ===============================
 -- BẢNG CT_LICH_DICHVU
@@ -86,17 +86,18 @@ CREATE TABLE IF NOT EXISTS "CT_Lich_DichVu" (
     PRIMARY KEY ("maLich", "maDV"),
     CONSTRAINT fk_ct_lich FOREIGN KEY ("maLich") REFERENCES "LichHen"("maLich"),
     CONSTRAINT fk_ct_dv FOREIGN KEY ("maDV") REFERENCES "DichVu"("maDV")
-    );
+);
 
 -- ===============================
 -- BẢNG PHỤ TÙNG
 -- ===============================
 CREATE TABLE IF NOT EXISTS "PhuTung" (
     "maPT" VARCHAR(10) PRIMARY KEY,
-    "tenPT" VARCHAR(100),
-    "donGia" NUMERIC(12,2),
-    "soLuongTon" INTEGER
-    );
+    "tenPT" VARCHAR(255),
+    "donGia" NUMERIC(14,2),
+    "soLuongTon" INTEGER DEFAULT 0,
+    "hinhAnh" VARCHAR(255)
+);
 
 -- ===============================
 -- BẢNG PHIẾU SỬA CHỮA
@@ -110,7 +111,7 @@ CREATE TABLE IF NOT EXISTS "PhieuSuaChua" (
     "trangThai" VARCHAR(50),
     CONSTRAINT fk_phieu_lich FOREIGN KEY ("maLich") REFERENCES "LichHen"("maLich"),
     CONSTRAINT fk_phieu_nv FOREIGN KEY ("maNV") REFERENCES "NhanVien"("maNV")
-    );
+);
 
 -- ===============================
 -- BẢNG CT_SuaChua_PhuTung
@@ -123,7 +124,7 @@ CREATE TABLE IF NOT EXISTS "CT_SuaChua_PhuTung" (
     PRIMARY KEY ("maPhieu", "maPT"),
     CONSTRAINT fk_ct_phieu FOREIGN KEY ("maPhieu") REFERENCES "PhieuSuaChua"("maPhieu"),
     CONSTRAINT fk_ct_pt FOREIGN KEY ("maPT") REFERENCES "PhuTung"("maPT")
-    );
+);
 
 -- ===============================
 -- BẢNG PHẢN HỒI
@@ -138,7 +139,7 @@ CREATE TABLE IF NOT EXISTS "PhanHoi" (
     "phanHoiQL" TEXT,
     CONSTRAINT fk_phanhoi_kh FOREIGN KEY ("maKH") REFERENCES "KhachHang"("maKH"),
     CONSTRAINT fk_phanhoi_nv FOREIGN KEY ("maNVXL") REFERENCES "NhanVien"("maNV")
-    );
+);
 
 -- ===============================
 -- BẢNG BÁO CÁO
@@ -153,7 +154,7 @@ CREATE TABLE IF NOT EXISTS "BaoCao" (
 );
 
 -- ===============================
--- BẢNG THÔNG TIN DỊCH VỤ (ServiceInfo)
+-- BẢNG THÔNG TIN DỊCH VỤ (dùng cho RAG Chatbot)
 -- ===============================
 CREATE TABLE IF NOT EXISTS "ThongTinDichVu" (
     "id" SERIAL PRIMARY KEY,
@@ -164,18 +165,13 @@ CREATE TABLE IF NOT EXISTS "ThongTinDichVu" (
     "embedding" vector(768),
     "created_at" TIMESTAMP NOT NULL DEFAULT NOW(),
     "updated_at" TIMESTAMP
-    );
+);
 
--- Tạo index cho vector search
-CREATE INDEX embedding_idx ON "ThongTinDichVu"
+-- Tạo index cho vector search (pgvector)
+CREATE INDEX IF NOT EXISTS embedding_idx ON "ThongTinDichVu"
     USING ivfflat (embedding vector_cosine_ops)
     WITH (lists = 100);
 
--- Tạo index cho full-text search
-CREATE INDEX title_content_idx ON "ThongTinDichVu"
-<<<<<<< HEAD
+-- Tạo index cho full-text search (tiếng Anh - có thể đổi thành 'vietnamese' nếu cần)
+CREATE INDEX IF NOT EXISTS title_content_idx ON "ThongTinDichVu"
     USING gin(to_tsvector('english', title || ' ' || content));
-=======
-    USING gin(to_tsvector('english', title || ' ' || content));
-
->>>>>>> 39853ccdc7dd01c3a6211f37cbc694f5ffc6860c
