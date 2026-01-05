@@ -1,10 +1,9 @@
-// src/pages/admin/ReportManager.jsx
 import React, { useState, useEffect } from "react";
-import axios from "axios";
+import axiosInstance from "../../api/axiosInstance"; 
 import { TrendingUp, DollarSign, Car, Wrench, Calendar, Building } from "lucide-react";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from "recharts";
 
-const API = "http://localhost:8080/web_garage/reports";
+const API = "http://localhost:8080/admin/reports";
 
 export default function ReportManager() {
   const [summary, setSummary] = useState({ totalBranches: 0, totalRevenue: 0, totalCars: 0 });
@@ -15,8 +14,8 @@ export default function ReportManager() {
     const fetchData = async () => {
       try {
         const [summaryRes, monthlyRes] = await Promise.all([
-          axios.get(`${API}/summary`),
-          axios.get(`${API}/last12months`)
+          axiosInstance.get(`${API}/summary`),
+          axiosInstance.get(`${API}/last12months`)
         ]);
         setSummary(summaryRes.data);
         setMonthlyData(monthlyRes.data.map(item => ({

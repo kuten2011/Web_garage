@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/web_garage/bookings")
+@RequestMapping("/admin/bookings")
 public class BookingController {
 
     @Autowired

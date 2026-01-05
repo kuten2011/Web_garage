@@ -5,7 +5,7 @@ import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { vscDarkPlus } from 'react-syntax-highlighter/dist/esm/styles/prism';
 import './Chatbot.css';
 
-const API_URL = 'http://localhost:8080/web_garage/chatbot';
+const API_URL = 'http://localhost:8080/chatbot';
 
 const Chatbot = ({ onClose }) => {
     const [messages, setMessages] = useState([

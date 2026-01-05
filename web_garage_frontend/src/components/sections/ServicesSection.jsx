@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from "react-router-dom";
 import { Wrench, Star, Clock, Sparkles } from 'lucide-react';
 
-const API = "http://localhost:8080/web_garage/services";
+const API = "http://localhost:8080/admin/services";
 
 export default function ServicesSection({ onViewAllServices }) {
     const [services, setServices] = useState([]);

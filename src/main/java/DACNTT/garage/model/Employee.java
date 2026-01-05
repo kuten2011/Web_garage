@@ -1,5 +1,6 @@
 package DACNTT.garage.model;
 
+import DACNTT.garage.util.Enum.Role;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -23,4 +24,7 @@ public class Employee {
     @ManyToOne
     @JoinColumn(name = "maChiNhanh")
     private Branch chiNhanh;
+
+    @Enumerated(EnumType.STRING)
+    private Role role = Role.ROLE_EMPLOYEE;
 }

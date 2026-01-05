@@ -1,7 +1,5 @@
-// src/pages/admin/BranchManager.jsx
-// FILE HOÀN CHỈNH TUYỆT ĐỐI – KHÔNG LỆCH CỘT, ĐẸP CHUYÊN NGHIỆP, BỘ LỌC NÂNG CAO
 import React, { useState, useEffect } from "react";
-import axios from "axios";
+import axiosInstance from "../../api/axiosInstance"; 
 import {
   Plus,
   Search,
@@ -15,7 +13,7 @@ import {
   ChevronRight,
 } from "lucide-react";
 
-const API = "http://localhost:8080/web_garage/branches";
+const API = "http://localhost:8080/admin/branches";
 const PAGE_SIZE = 10;
 
 export default function BranchManager() {
@@ -49,7 +47,7 @@ export default function BranchManager() {
       if (searchSdt.trim()) params.sdt = searchSdt.trim();
       if (searchEmail.trim()) params.email = searchEmail.trim();
 
-      const res = await axios.get(API, { params });
+      const res = await axiosInstance.get(API, { params });
       setData(res.data);
     } catch (err) {
       alert("Lỗi tải danh sách chi nhánh!");
@@ -74,10 +72,10 @@ export default function BranchManager() {
     }
     try {
       if (editing) {
-        await axios.put(`${API}/${form.maChiNhanh}`, form);
+        await axiosInstance.put(`${API}/${form.maChiNhanh}`, form);
         alert("Cập nhật thành công!");
       } else {
-        await axios.post(API, form);
+        await axiosInstance.post(API, form);
         alert("Thêm chi nhánh thành công!");
       }
       setShowForm(false);
@@ -98,7 +96,7 @@ export default function BranchManager() {
   const handleDelete = async (maChiNhanh) => {
     if (!window.confirm("Xóa chi nhánh này?")) return;
     try {
-      await axios.delete(`${API}/${maChiNhanh}`);
+      await axiosInstance.delete(`${API}/${maChiNhanh}`);
       fetchData();
     } catch (err) {
       alert("Xóa thất bại!");

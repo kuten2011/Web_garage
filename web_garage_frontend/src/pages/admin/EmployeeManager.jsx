@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from "react";
-import axios from "axios";
+import axiosInstance from "../../api/axiosInstance"; 
 
 export default function EmployeeManager() {
   const [employees, setEmployees] = useState([]);
 
   useEffect(() => {
-    axios.get("http://localhost:8080/web_garage/employees")
+    axiosInstance.get("http://localhost:8080/admin/employees")
       .then(res => setEmployees(res.data.content || res.data));
   }, []);
 

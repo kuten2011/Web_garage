@@ -8,7 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/web_garage/services")
+@RequestMapping("/admin/services")
 public class ServiceEntityController {
 
     @Autowired

@@ -1,6 +1,11 @@
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+// src/App.jsx
+import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
+import { useState, useEffect } from "react";
+
 import GarageWebsite from "./GarageWebsite";
 import AdminLayout from "./admin/AdminLayout";
+import AdminLogin from "./security/Login";
+
 import AdminDashboard from "./admin/AdminDashboard";
 import BookingManager from "./admin/BookingManager";
 import RepairManager from "./admin/RepairManager";
@@ -17,14 +22,30 @@ import FeedbackManager from "./admin/FeedbackManager";
 import PaymentSuccess from "./payment/PaymentSuccess";
 import PaymentFailed from "./payment/PaymentFailed";
 
-import Services from "./customer/Services.jsx"
-import Parts from "./customer/Parts.jsx"
-import ChatbotComponent from "../components/chatbot/ChatbotComponent";
+import Services from "./customer/Services";
+import Parts from "./customer/Parts";
+
+// Component bảo vệ route admin
+function ProtectedAdminRoute({ children }) {
+  const [isAuthenticated, setIsAuthenticated] = useState(null);
+
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    setIsAuthenticated(!!token);
+  }, []);
+
+  if (isAuthenticated === null) {
+    return <div className="min-h-screen flex items-center justify-center text-2xl">Đang kiểm tra đăng nhập...</div>;
+  }
+
+  return isAuthenticated ? children : <Navigate to="/admin/login" replace />;
+}
 
 export default function App() {
   return (
     <Router>
       <Routes>
+        {/* Trang khách hàng */}
         <Route path="/*" element={<GarageWebsite />} />
 
         {/* Payment Routes */}
@@ -35,7 +56,18 @@ export default function App() {
         <Route path="/services" element={<Services />} />
         <Route path="/parts" element={<Parts />} />
 
-        <Route path="/admin" element={<AdminLayout />}>
+        {/* ĐĂNG NHẬP ADMIN – TRUY CẬP TRỰC TIẾP ĐƯỢC */}
+        <Route path="/admin/login" element={<AdminLogin />} />
+
+        {/* TOÀN BỘ ADMIN – BẢO VỆ BẰNG TOKEN */}
+        <Route
+          path="/admin"
+          element={
+            <ProtectedAdminRoute>
+              <AdminLayout />
+            </ProtectedAdminRoute>
+          }
+        >
           <Route index element={<AdminDashboard />} />
           <Route path="bookings" element={<BookingManager />} />
           <Route path="repairs" element={<RepairManager />} />
@@ -49,10 +81,10 @@ export default function App() {
           <Route path="feedbacks" element={<FeedbackManager />} />
           <Route path="reports" element={<ReportManager />} />
         </Route>
-      </Routes>
 
-      {/* Chatbot hiển thị toàn trang */}
-      <ChatbotComponent />
+        {/* Redirect nếu vào /admin mà chưa login */}
+        <Route path="/admin" element={<Navigate to="/admin/login" replace />} />
+      </Routes>
     </Router>
   );
 }

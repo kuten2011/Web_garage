@@ -1,12 +1,12 @@
 import React, { useState, useEffect, useMemo } from "react";
-import axios from "axios";
+import axiosInstance from "../../api/axiosInstance"; 
 import {
   Plus, Search, Wrench, CalendarDays, User, Edit3, Trash2,
   ChevronLeft, ChevronRight, ClipboardList
 } from "lucide-react";
 import { Link } from "react-router-dom";
 
-const API_BASE = "http://localhost:8080/web_garage";
+const API_BASE = "http://localhost:8080/admin";
 const API = `${API_BASE}/repairs`;
 const PAGE_SIZE = 10;
 
@@ -26,7 +26,7 @@ export default function RepairManager() {
   const fetchData = async () => {
     try {
       setLoading(true);
-      const res = await axios.get(API, {
+      const res = await axiosInstance.get(API, {
         params: { page, size: PAGE_SIZE, sort: "ngayLap,desc" }
       });
       setData(res.data);
@@ -64,7 +64,7 @@ export default function RepairManager() {
 
   const updateStatus = async (maPhieu, newStatus) => {
     try {
-      await axios.patch(`${API}/${maPhieu}/status`, { trangThai: newStatus });
+      await axiosInstance.patch(`${API}/${maPhieu}/status`, { trangThai: newStatus });
       fetchData();
     } catch (err) {
       alert("Cập nhật trạng thái thất bại!");
@@ -74,7 +74,7 @@ export default function RepairManager() {
   const handleDelete = async (maPhieu) => {
     if (!window.confirm("Xóa phiếu sửa chữa này?")) return;
     try {
-      await axios.delete(`${API}/${maPhieu}`);
+      await axiosInstance.delete(`${API}/${maPhieu}`);
       fetchData();
     } catch (err) {
       alert("Xóa thất bại!");
@@ -103,10 +103,10 @@ export default function RepairManager() {
   const handleSave = async () => {
     try {
       if (editingItem) {
-        await axios.put(`${API}/${editingItem.maPhieu}`, formData);
+        await axiosInstance.put(`${API}/${editingItem.maPhieu}`, formData);
         alert("Cập nhật thành công!");
       } else {
-        await axios.post(API, formData);
+        await axiosInstance.post(API, formData);
         alert("Thêm phiếu thành công! Mã phiếu đã được tạo tự động.");
       }
       setShowForm(false);

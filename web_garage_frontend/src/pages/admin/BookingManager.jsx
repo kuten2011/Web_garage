@@ -2,7 +2,7 @@ import React, { useState, useEffect, useMemo } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import axios from "axios";
+import axiosInstance from "../../api/axiosInstance"; 
 import {
   Plus,
   Search,
@@ -16,7 +16,7 @@ import {
   X,
 } from "lucide-react";
 
-const API_BASE = "http://localhost:8080/web_garage";
+const API_BASE = "http://localhost:8080/admin";
 const PAGE_SIZE = 10;
 
 const addSchema = z.object({
@@ -67,7 +67,7 @@ export default function BookingManager() {
       if (dateFrom) params.append("dateFrom", dateFrom);
       if (dateTo) params.append("dateTo", dateTo);
 
-      const res = await axios.get(`${API_BASE}/bookings?${params.toString()}`);
+      const res = await axiosInstance.get(`${API_BASE}/bookings?${params.toString()}`);
       setData(res.data);
     } catch (err) {
       alert("Lỗi tải dữ liệu: " + (err.response?.data?.message || err.message));
@@ -89,7 +89,7 @@ export default function BookingManager() {
 
   const updateStatus = async (maLich, newStatus) => {
     try {
-      await axios.patch(`${API_BASE}/bookings/${maLich}/status`, {
+      await axiosInstance.patch(`${API_BASE}/bookings/${maLich}/status`, {
         trangThai: newStatus,
       });
       fetchData();
@@ -101,7 +101,7 @@ export default function BookingManager() {
   const handleDelete = async (maLich) => {
     if (!window.confirm("Xóa lịch hẹn này?")) return;
     try {
-      await axios.delete(`${API_BASE}/bookings/${maLich}`);
+      await axiosInstance.delete(`${API_BASE}/bookings/${maLich}`);
       fetchData();
     } catch (err) {
       alert("Xóa thất bại!");
@@ -127,11 +127,11 @@ export default function BookingManager() {
   const onSubmit = async (formData) => {
     try {
       if (isEditing) {
-        await axios.put(`${API_BASE}/bookings/${formData.maLich}`, formData);
+        await axiosInstance.put(`${API_BASE}/bookings/${formData.maLich}`, formData);
         alert("Cập nhật thành công!");
       } else {
         const { maLich, ...payload } = formData;
-        await axios.post(`${API_BASE}/bookings`, payload);
+        await axiosInstance.post(`${API_BASE}/bookings`, payload);
         alert("Thêm lịch hẹn thành công!");
       }
       setShowForm(false);

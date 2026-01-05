@@ -7,7 +7,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/web_garage/chatbot")
+@RequestMapping("/chatbot")
 public class ChatBotController {
     @Autowired
     private ChatBotHandle chatBotHandle;

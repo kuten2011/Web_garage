@@ -1,13 +1,11 @@
-// src/pages/admin/VehicleManager.jsx
-// BẢN FULL HOÀN CHỈNH – ĐẸP NHƯ HÌNH, KHÔNG LỖI, CHẠY MƯỢT 100%
 import React, { useState, useEffect } from "react";
-import axios from "axios";
+import axiosInstance from "../../api/axiosInstance"; 
 import {
   Plus, Search, Car, User, Edit3, Trash2,
   ChevronLeft, ChevronRight, Gauge, Calendar
 } from "lucide-react";
 
-const API = "http://localhost:8080/web_garage/vehicles";
+const API = "http://localhost:8080/admin/vehicles";
 const PAGE_SIZE = 10;
 
 export default function VehicleManager() {
@@ -37,7 +35,7 @@ export default function VehicleManager() {
   const fetchData = async () => {
     setLoading(true);
     try {
-      const res = await axios.get(API, {
+      const res = await axiosInstance.get(API, {
         params: { page, size: PAGE_SIZE }
       });
       setData(res.data);
@@ -79,10 +77,10 @@ export default function VehicleManager() {
     }
     try {
       if (editing) {
-        await axios.put(`${API}/${form.bienSo}`, form);
+        await axiosInstance.put(`${API}/${form.bienSo}`, form);
         alert("Cập nhật thành công!");
       } else {
-        await axios.post(API, form);
+        await axiosInstance.post(API, form);
         alert("Thêm xe thành công!");
       }
       setShowForm(false);
@@ -97,7 +95,7 @@ export default function VehicleManager() {
   const handleDelete = async (bienSo) => {
     if (!window.confirm(`Xóa xe biển số ${bienSo}?`)) return;
     try {
-      await axios.delete(`${API}/${bienSo}`);
+      await axiosInstance.delete(`${API}/${bienSo}`);
       fetchData();
     } catch {
       alert("Xóa thất bại!");

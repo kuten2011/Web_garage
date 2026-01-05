@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Search, ChevronLeft, ChevronRight, Wrench, Clock, Star, ArrowLeft, X } from "lucide-react";
 
-const API = "http://localhost:8080/web_garage/services";
+const API = "http://localhost:8080/admin/services";
 const PAGE_SIZE = 8;
 
 export default function ServicesPage({ onBack }) {

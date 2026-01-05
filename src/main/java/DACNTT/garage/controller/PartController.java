@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 @RestController
-@RequestMapping("/web_garage/parts")
+@RequestMapping("/admin/parts")
 public class PartController {
 
     @Autowired private PartHandle partHandle;

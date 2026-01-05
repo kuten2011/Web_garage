@@ -1,8 +1,6 @@
-// src/pages/admin/RepairDetail.jsx
-// HOÀN CHỈNH TUYỆT ĐỐI – ĐỒNG BỘ REPAIR PART & REPAIR SERVICE
 import React, { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
-import axios from "axios";
+import axiosInstance from "../../api/axiosInstance"; 
 import {
   ArrowLeft,
   Car,
@@ -15,7 +13,7 @@ import {
   DollarSign,
 } from "lucide-react";
 
-const API_BASE = "http://localhost:8080/web_garage";
+const API_BASE = "http://localhost:8080/admin";
 const REPAIR_API = `${API_BASE}/repairs`;
 const REPAIR_PART_API = `${API_BASE}/repair-parts/phieu`;
 const REPAIR_SERVICE_API = `${API_BASE}/repair-services/phieu`; // ĐỒNG BỘ VỚI BACKEND MỚI
@@ -38,9 +36,9 @@ export default function RepairDetail() {
   const fetchData = async () => {
     try {
       const [repairRes, partsRes, servicesRes] = await Promise.all([
-        axios.get(`${REPAIR_API}/${maPhieu}`),
-        axios.get(`${REPAIR_PART_API}/${maPhieu}`),
-        axios.get(`${REPAIR_SERVICE_API}/${maPhieu}`),
+        axiosInstance.get(`${REPAIR_API}/${maPhieu}`),
+        axiosInstance.get(`${REPAIR_PART_API}/${maPhieu}`),
+        axiosInstance.get(`${REPAIR_SERVICE_API}/${maPhieu}`),
       ]);
       setRepair(repairRes.data);
       setParts(partsRes.data);
@@ -60,7 +58,7 @@ export default function RepairDetail() {
   const handleAddPart = async () => {
     if (!newPart.maPT.trim()) return alert("Vui lòng nhập mã phụ tùng!");
     try {
-      await axios.post(`${REPAIR_PART_API}/${maPhieu}`, newPart);
+      await axiosInstance.post(`${REPAIR_PART_API}/${maPhieu}`, newPart);
       setShowAddPart(false);
       setNewPart({ maPT: "", soLuong: 1 });
       fetchData();
@@ -72,7 +70,7 @@ export default function RepairDetail() {
   const handleRemovePart = async (maPT) => {
     if (!window.confirm("Xóa phụ tùng này?")) return;
     try {
-      await axios.delete(`${REPAIR_PART_API}/${maPhieu}/phutung/${maPT}`);
+      await axiosInstance.delete(`${REPAIR_PART_API}/${maPhieu}/phutung/${maPT}`);
       fetchData();
     } catch (err) {
       alert("Xóa thất bại!");
@@ -82,7 +80,7 @@ export default function RepairDetail() {
   const handleAddService = async () => {
     if (!newService.maDV.trim()) return alert("Vui lòng nhập mã dịch vụ!");
     try {
-      await axios.post(`${REPAIR_SERVICE_API}/${maPhieu}`, newService);
+      await axiosInstance.post(`${REPAIR_SERVICE_API}/${maPhieu}`, newService);
       setShowAddService(false);
       setNewService({ maDV: "", soLuong: 1 });
       fetchData();
@@ -94,7 +92,7 @@ export default function RepairDetail() {
   const handleRemoveService = async (maDV) => {
     if (!window.confirm("Xóa dịch vụ này?")) return;
     try {
-      await axios.delete(`${REPAIR_SERVICE_API}/${maPhieu}/dichvu/${maDV}`);
+      await axiosInstance.delete(`${REPAIR_SERVICE_API}/${maPhieu}/dichvu/${maDV}`);
       fetchData();
     } catch (err) {
       alert("Xóa thất bại!");

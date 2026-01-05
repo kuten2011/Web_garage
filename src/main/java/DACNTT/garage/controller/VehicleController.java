@@ -8,7 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/web_garage/vehicles")
+@RequestMapping("/admin/vehicles")
 public class VehicleController {
 
     @Autowired private VehicleHandle vehicleHandle;

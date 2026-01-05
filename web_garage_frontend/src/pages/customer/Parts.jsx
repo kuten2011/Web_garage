@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { Search, ChevronLeft, ChevronRight, Package, Clock, Star, ArrowLeft, AlertCircle, Filter } from "lucide-react";
 import {useNavigate} from "react-router-dom";
 
-const API = "http://localhost:8080/web_garage/parts";
+const API = "http://localhost:8080/admin/parts";
 const DEFAULT_IMAGE = "https://placehold.net/400x400.png";
 const PAGE_SIZE = 8;
 

@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from "react";
-import axios from "axios";
+import axiosInstance from "../../api/axiosInstance"; 
 import { Plus, Search, DollarSign, Edit3, Trash2, ChevronLeft, ChevronRight } from "lucide-react";
 
-const API = "http://localhost:8080/web_garage/services";
+const API = "http://localhost:8080/admin/services";
 const PAGE_SIZE = 10;
 
 export default function ServiceManager() {
@@ -30,7 +30,7 @@ export default function ServiceManager() {
       if (priceFrom) params.priceFrom = priceFrom;
       if (priceTo) params.priceTo = priceTo;
 
-      const res = await axios.get(API, { params });
+      const res = await axiosInstance.get(API, { params });
       setData(res.data);
     } catch (err) {
       alert("Lỗi tải danh sách dịch vụ!");
@@ -51,10 +51,10 @@ export default function ServiceManager() {
     }
     try {
       if (editing) {
-        await axios.put(`${API}/${form.maDV}`, form);
+        await axiosInstance.put(`${API}/${form.maDV}`, form);
         alert("Cập nhật dịch vụ thành công!");
       } else {
-        await axios.post(API, form);
+        await axiosInstance.post(API, form);
         alert("Thêm dịch vụ thành công!");
       }
       setShowForm(false);
@@ -69,7 +69,7 @@ export default function ServiceManager() {
   const handleDelete = async (maDV) => {
     if (!window.confirm(`Xóa dịch vụ ${maDV}?`)) return;
     try {
-      await axios.delete(`${API}/${maDV}`);
+      await axiosInstance.delete(`${API}/${maDV}`);
       fetchData();
     } catch (err) {
       alert("Xóa thất bại!");

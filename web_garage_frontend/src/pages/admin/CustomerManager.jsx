@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from "react";
-import axios from "axios";
+import axiosInstance from "../../api/axiosInstance"; 
 
 export default function CustomerManager() {
   const [customers, setCustomers] = useState([]);
 
   useEffect(() => {
-    axios.get("http://localhost:8080/web_garage/customers")
+    axiosInstance.get("http://localhost:8080/admin/customers")
       .then(res => setCustomers(res.data.content || res.data));
   }, []);
 

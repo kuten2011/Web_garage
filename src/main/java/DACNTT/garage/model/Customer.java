@@ -1,5 +1,6 @@
 package DACNTT.garage.model;
 
+import DACNTT.garage.util.Enum.Role;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -19,4 +20,7 @@ public class Customer {
     private String email;
     private String diaChi;
     private String matKhau;
+
+    @Enumerated(EnumType.STRING)
+    private Role role = Role.ROLE_CUSTOMER;
 }

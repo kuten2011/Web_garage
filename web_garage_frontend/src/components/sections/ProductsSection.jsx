@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Package, Star, Clock } from 'lucide-react';
 
 
-const API = "http://localhost:8080/web_garage/parts";
+const API = "http://localhost:8080/admin/parts";
 const DEFAULT_PART_IMAGE = "https://placehold.net/400x400.png";
 
 export default function PartsSection({ onViewAllParts }) {

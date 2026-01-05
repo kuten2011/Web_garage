@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from "react";
-import axios from "axios";
+import axiosInstance from "../../api/axiosInstance"; 
 import {
   Plus, Search, Package, Edit3, Trash2,
   ChevronLeft, ChevronRight, AlertTriangle,
   ArrowUpDown, Upload, X, Image
 } from "lucide-react";
 
-const API = "http://localhost:8080/web_garage/parts";
+const API = "http://localhost:8080/admin/parts";
 const PAGE_SIZE = 10;
 
 export default function PartManager() {
@@ -43,7 +43,7 @@ export default function PartManager() {
       if (priceTo) params.append("priceTo", priceTo);
       if (stockUnder) params.append("stockUnder", stockUnder);
 
-      const res = await axios.get(`${API}?${params.toString()}`);
+      const res = await axiosInstance.get(`${API}?${params.toString()}`);
       setData(res.data);
     } catch (err) {
       console.error(err);
@@ -85,13 +85,13 @@ export default function PartManager() {
   //   }
   //   try {
   //     if (editing) {
-  //       await axios.put(`${API}/${editing.maPT}`, {
+  //       await axiosInstance.put(`${API}/${editing.maPT}`, {
   //         tenPT: form.tenPT,
   //         donGia: Number(form.donGia),
   //         soLuongTon: Number(form.soLuongTon)
   //       });
   //     } else {
-  //       await axios.post(API, {
+  //       await axiosInstance.post(API, {
   //         tenPT: form.tenPT,
   //         donGia: Number(form.donGia),
   //         soLuongTon: Number(form.soLuongTon)
@@ -123,7 +123,7 @@ export default function PartManager() {
           formData.append("image", imageFile);
         }
 
-        await axios.put(`${API}/${editing.maPT}`, formData, {
+        await axiosInstance.put(`${API}/${editing.maPT}`, formData, {
           headers: { "Content-Type": "multipart/form-data" }
         });
       } else {
@@ -137,7 +137,7 @@ export default function PartManager() {
           formData.append("image", imageFile);
         }
 
-        await axios.post(API, formData, {
+        await axiosInstance.post(API, formData, {
           headers: { "Content-Type": "multipart/form-data" }
         });
       }
@@ -154,7 +154,7 @@ export default function PartManager() {
 
   const handleDelete = async (maPT) => {
     if (!confirm("Xóa phụ tùng này?")) return;
-    await axios.delete(`${API}/${maPT}`);
+    await axiosInstance.delete(`${API}/${maPT}`);
     fetchData();
   };
 

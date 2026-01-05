@@ -1,9 +1,9 @@
 // src/pages/admin/FeedbackManager.jsx
 import React, { useState, useEffect } from "react";
-import axios from "axios";
+import axiosInstance from "../../api/axiosInstance"; 
 import { Search, MessageSquare, User, Clock, CheckCircle, AlertCircle, Edit3, ChevronLeft, ChevronRight } from "lucide-react";
 
-const API = "http://localhost:8080/web_garage/feedbacks";
+const API = "http://localhost:8080/admin/feedbacks";
 const PAGE_SIZE = 10;
 
 export default function FeedbackManager() {
@@ -24,7 +24,7 @@ export default function FeedbackManager() {
       if (search.trim()) params.search = search.trim();
       if (filterStatus) params.trangThai = filterStatus;
 
-      const res = await axios.get(API, { params });
+      const res = await axiosInstance.get(API, { params });
       setData(res.data);
     } catch (err) {
       alert("Lỗi tải danh sách phản hồi!");
@@ -54,7 +54,7 @@ export default function FeedbackManager() {
         trangThai: "Đã phản hồi",
         phanHoiQL: responseText.trim()
       };
-      await axios.patch(`${API}/${currentFeedback.maPhanHoi}`, dto);
+      await axiosInstance.patch(`${API}/${currentFeedback.maPhanHoi}`, dto);
       alert("Phản hồi khách hàng thành công!");
       setShowForm(false);
       setCurrentFeedback(null);

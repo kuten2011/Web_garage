@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/web_garage/repair-services")
+@RequestMapping("/admin/repair-services")
 public class RepairServiceController {
 
     @Autowired
