@@ -92,4 +92,9 @@ public class RepairServiceImpl implements RepairService {
         return repairRepository.findById(maPhieu)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy phiếu sửa chữa: " + maPhieu));
     }
+
+    @Override
+    public Repair save(Repair repair) {
+        return repairRepository.save(repair);
+    }
 }

@@ -1,3 +1,4 @@
+// src/main/java/DACNTT/garage/dto/RepairDTO.java
 package DACNTT.garage.dto;
 
 import lombok.AllArgsConstructor;
@@ -18,6 +19,10 @@ public class RepairDTO {
     private LocalDate ngayLap;
     private String ghiChu;
     private String trangThai;
+
+    private String thanhToanStatus;
+
+    private Double tongTien;
 
     private CustomerDTO khachHang;
     private VehicleDTO xe;

@@ -1,16 +1,15 @@
 -- ===============================
--- THÊM DỮ LIỆU MẪU
+-- THÊM DỮ LIỆU MẪU (ĐÃ SỬA ĐÚNG THỨ TỰ VÀ TÊN BẢNG)
 -- ===============================
 
--- ===== BẢNG CHI NHÁNH =====
+-- Chi nhánh
 INSERT INTO "ChiNhanh" ("maChiNhanh", "tenChiNhanh", "diaChi", "sdt", "email")
 VALUES
 ('CN01', 'Chi nhánh Quận 1', '123 Nguyễn Huệ, Q1, TP.HCM', '0909123456', 'cnq1@garage.vn'),
 ('CN02', 'Chi nhánh Bình Thạnh', '45 Điện Biên Phủ, Q.BT, TP.HCM', '0909988776', 'cnbt@garage.vn')
 ON CONFLICT ("maChiNhanh") DO NOTHING;
 
--- ===== BẢNG KHÁCH HÀNG =====
--- Thêm cột role (DEFAULT ROLE_CUSTOMER) và matKhau nên dùng hashed (ở đây để plain tạm, thực tế phải bcrypt)
+-- Khách hàng
 INSERT INTO "KhachHang" ("maKH", "hoTen", "sdt", "email", "diaChi", "matKhau", "role")
 VALUES
 ('KH01', 'Nguyễn Văn A', '0905123456', 'a.nguyen@gmail.com', 'Q1, TP.HCM', '$2a$10$examplehash1234567890abcdef', 'ROLE_CUSTOMER'),
@@ -18,7 +17,7 @@ VALUES
 ('KH03', 'Lê Hoàng C', '0907345678', 'c.le@gmail.com', 'Q7, TP.HCM', '$2a$10$examplehash1234567890abcdef', 'ROLE_CUSTOMER')
 ON CONFLICT ("maKH") DO NOTHING;
 
--- ===== BẢNG NHÂN VIÊN =====
+-- Nhân viên
 INSERT INTO "NhanVien" ("maNV", "hoTen", "vaiTro", "sdt", "email", "matKhau", "maChiNhanh", "role")
 VALUES
 ('NV01', 'Phạm Văn D', 'Kỹ thuật viên', '0908123123', 'd.pham@garage.vn', '$2a$10$examplehash1234567890abcdef', 'CN01', 'ROLE_EMPLOYEE'),
@@ -26,7 +25,7 @@ VALUES
 ('NV03', 'Ngô Minh F', 'Quản lý', '0909678456', 'f.ngo@garage.vn', '$2a$10$examplehash1234567890abcdef', 'CN02', 'ROLE_MANAGER')
 ON CONFLICT ("maNV") DO NOTHING;
 
--- ===== BẢNG XE =====
+-- Xe
 INSERT INTO "Xe" ("bienSo", "maKH", "hangXe", "mauXe", "soKm", "namSX")
 VALUES
 ('59A-12345', 'KH01', 'Toyota', 'Trắng', 35000, 2019),
@@ -34,7 +33,7 @@ VALUES
 ('50C-11223', 'KH03', 'Mazda', 'Đỏ', 15000, 2022)
 ON CONFLICT ("bienSo") DO NOTHING;
 
--- ===== BẢNG LỊCH HẸN =====
+-- Lịch hẹn
 INSERT INTO "LichHen" ("maLich", "maKH", "bienSo", "ngayHen", "gioHen", "trangThai")
 VALUES
 ('LH01', 'KH01', '59A-12345', '2025-10-20', '09:00:00', 'Chờ xác nhận'),
@@ -42,7 +41,7 @@ VALUES
 ('LH03', 'KH03', '50C-11223', '2025-10-22', '08:00:00', 'Đã hoàn thành')
 ON CONFLICT ("maLich") DO NOTHING;
 
--- ===== BẢNG DỊCH VỤ =====
+-- Dịch vụ (giữ nguyên như bạn có)
 INSERT INTO "DichVu" ("maDV", "tenDV", "giaTien", "moTa")
 VALUES
 -- BẢO DƯỠNG ĐỊNH KỲ
@@ -109,43 +108,41 @@ VALUES
 ('DV03', 'Tư vấn kỹ thuật', 200000, 'Tư vấn sửa chữa và bảo dưỡng')
 ON CONFLICT ("maDV") DO NOTHING;
 
--- ===== BẢNG CT_LICH_DICHVU =====
-INSERT INTO "CT_Lich_DichVu" ("maLich", "maDV", "soLuong", "ghiChu")
-VALUES
-('LH01', 'BD01', 1, 'Dầu tổng hợp cao cấp, kèm thay lọc dầu'),
-('LH02', 'CS02', 1, 'Xe rất bẩn, rửa kỹ và hút bụi nội thất'),
-('LH02', 'DC04', 1, 'Thay bugi đánh lửa mới'),
-('LH03', 'PH01', 1, 'Kiểm tra phanh trước, điều chỉnh má phanh'),
-('LH03', 'BD03', 1, 'Bảo dưỡng 10.000km: dầu, lốp, ắc quy, treo')
-ON CONFLICT ("maLich", "maDV") DO NOTHING;
-
--- ===== BẢNG PHỤ TÙNG =====
+-- Phụ tùng
 INSERT INTO "PhuTung" ("maPT", "tenPT", "donGia", "soLuongTon", "hinhAnh")
 VALUES
 ('PT01', 'Dầu máy 5W30', 450000, 50, 'https://res.cloudinary.com/web-garage/image/upload/dau-tong-hop_nxrjxy.jpg'),
 ('PT02', 'Lọc dầu', 250000, 30, 'https://res.cloudinary.com/web-garage/image/upload/loc-dau_n2pyj2.jpg')
 ON CONFLICT ("maPT") DO NOTHING;
 
--- ===== BẢNG PHIẾU SỬA CHỮA =====
+-- PHIẾU SỬA CHỮA (phải INSERT TRƯỚC chi tiết)
 INSERT INTO "PhieuSuaChua" ("maPhieu", "maLich", "maNV", "ngayLap", "ghiChu", "trangThai")
 VALUES
 ('PSC01', 'LH03', 'NV01', '2025-10-22', 'Bảo dưỡng định kỳ và thay phanh', 'Hoàn thành')
 ON CONFLICT ("maPhieu") DO NOTHING;
 
--- ===== BẢNG CT_SuaChua_PhuTung =====
+-- CHI TIẾT SỬA CHỮA - DỊCH VỤ (bảng mới, dùng maPhieu)
+INSERT INTO "CT_SuaChua_DichVu" ("maPhieu", "maDV", "soLuong", "ghiChu", "thanhTien")
+VALUES
+('PSC01', 'BD03', 1, 'Bảo dưỡng 10.000km: dầu, lốp, ắc quy, treo', 1200000),
+('PSC01', 'PH01', 1, 'Kiểm tra phanh trước, điều chỉnh má phanh', 300000),
+('PSC01', 'CS02', 1, 'Rửa xe cao cấp sau sửa chữa', 150000)
+ON CONFLICT ("maPhieu", "maDV") DO NOTHING;
+
+-- CHI TIẾT SỬA CHỮA - PHỤ TÙNG
 INSERT INTO "CT_SuaChua_PhuTung" ("maPhieu", "maPT", "soLuong", "thanhTien")
 VALUES
 ('PSC01', 'PT01', 1, 450000),
 ('PSC01', 'PT02', 1, 250000)
 ON CONFLICT ("maPhieu", "maPT") DO NOTHING;
 
--- ===== BẢNG PHẢN HỒI =====
+-- Phản hồi
 INSERT INTO "PhanHoi" ("maPhanHoi", "maKH", "noiDung", "ngayGui", "trangThai", "maNVXL", "phanHoiQL")
 VALUES
 ('PH01', 'KH01', 'Thái độ phục vụ tốt.', '2025-10-23 09:30:00', 'Đã phản hồi', 'NV03', 'Cảm ơn góp ý của bạn!')
 ON CONFLICT ("maPhanHoi") DO NOTHING;
 
--- ===== BẢNG BÁO CÁO =====
+-- Báo cáo
 INSERT INTO "BaoCao" ("maBC", "maChiNhanh", "thangNam", "doanhThu", "soXePhucVu")
 VALUES
 ('BC01', 'CN01', '10/2025', 2500000, 12),

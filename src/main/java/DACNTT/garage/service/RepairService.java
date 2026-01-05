@@ -18,4 +18,6 @@ public interface RepairService {
     void deleteById(String maPhieu);
 
     Repair getRepairById(String maPhieu);
+
+    Repair save(Repair repair);
 }

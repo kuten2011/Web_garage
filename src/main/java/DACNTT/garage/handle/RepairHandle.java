@@ -102,4 +102,54 @@ public class RepairHandle {
         Repair repair = repairService.getRepairById(maPhieu);
         return ResponseEntity.ok(repairMapper.toRepairDTO(repair));
     }
+
+    public ResponseEntity<RepairDTO> confirmTransferPayment(String maPhieu) {
+        Repair repair = repairService.getRepairById(maPhieu);
+        if (repair == null) {
+            return ResponseEntity.notFound().build();
+        }
+        // Cập nhật trạng thái
+        repair.setThanhToanStatus("Đã thanh toán");
+        repair.setTrangThai("Hoàn thành");
+        repair = repairService.save(repair);
+        return ResponseEntity.ok(repairMapper.toRepairDTO(repair));
+    }
+
+    public ResponseEntity<?> updatePaymentStatus(String maPhieu, String status, String ghiChu) {
+        try {
+            Repair repair = repairService.getRepairById(maPhieu);
+            if (repair == null) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                        .body(Map.of("error", "Không tìm thấy phiếu sửa chữa"));
+            }
+            repair.setThanhToanStatus(status);
+            if ("Đã thanh toán".equals(status)) {
+                repair.setTrangThai("Hoàn thành");
+            }
+            Repair updated = repairService.update(maPhieu, repair);
+
+            return ResponseEntity.ok(Map.of(
+                    "message", "Cập nhật trạng thái thanh toán thành công",
+                    "maPhieu", maPhieu,
+                    "thanhToanStatus", status,
+                    "trangThai", updated.getTrangThai()
+            ));
+
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError()
+                    .body(Map.of("error", "Lỗi cập nhật: " + e.getMessage()));
+        }
+    }
+
+    public RepairDTO getRepairDTOById(String maPhieu) {
+        Repair repair = repairService.getRepairById(maPhieu);
+        if (repair == null) return null;
+
+        RepairDTO dto = repairMapper.toRepairDTO(repair);
+
+        dto.setTongTien(0.0);
+        dto.setThanhToanStatus(repair.getThanhToanStatus() != null ? repair.getThanhToanStatus() : "Chưa thanh toán");
+
+        return dto;
+    }
 }

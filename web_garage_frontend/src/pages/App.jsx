@@ -1,10 +1,9 @@
-// src/App.jsx
 import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 
-import GarageWebsite from "./GarageWebsite";
 import AdminLayout from "./admin/AdminLayout";
 import AdminLogin from "./security/Login";
+import RegisterPage from "./security/Register";
 
 import AdminDashboard from "./admin/AdminDashboard";
 import BookingManager from "./admin/BookingManager";
@@ -24,6 +23,8 @@ import PaymentFailed from "./payment/PaymentFailed";
 
 import Services from "./customer/Services";
 import Parts from "./customer/Parts";
+import CustomerLayout from "./customer/CustomerLayout"; // Import CustomerLayout
+import HomeContent from "./customer/HomeContent"; // Thêm mới: HomeContent từ nội dung GarageWebsite
 
 // Component bảo vệ route admin
 function ProtectedAdminRoute({ children }) {
@@ -45,19 +46,19 @@ export default function App() {
   return (
     <Router>
       <Routes>
-        {/* Trang khách hàng */}
-        <Route path="/*" element={<GarageWebsite />} />
+        {/* Trang khách hàng với layout chung */}
+        <Route path="/" element={<CustomerLayout><HomeContent /></CustomerLayout>} />
+        <Route path="/services" element={<CustomerLayout><Services /></CustomerLayout>} />
+        <Route path="/parts" element={<CustomerLayout><Parts /></CustomerLayout>} />
 
         {/* Payment Routes */}
         <Route path="/payment/success" element={<PaymentSuccess />} />
         <Route path="/payment/failed" element={<PaymentFailed />} />
 
-        {/* Customer services */}
-        <Route path="/services" element={<Services />} />
-        <Route path="/parts" element={<Parts />} />
-
         {/* ĐĂNG NHẬP ADMIN – TRUY CẬP TRỰC TIẾP ĐƯỢC */}
-        <Route path="/admin/login" element={<AdminLogin />} />
+        <Route path="/login" element={<AdminLogin />} />
+
+        <Route path="/register" element={<RegisterPage />} />
 
         {/* TOÀN BỘ ADMIN – BẢO VỆ BẰNG TOKEN */}
         <Route

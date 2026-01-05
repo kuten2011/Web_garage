@@ -1,8 +1,10 @@
--- Trong PostgreSQL
+-- ===============================
+-- CÀI ĐẶT VECTOR CHO RAG
+-- ===============================
 CREATE EXTENSION IF NOT EXISTS vector;
 
 -- ===============================
--- BẢNG CHI NHÁNH (dự đoán sẽ có entity Branch)
+-- BẢNG CHI NHÁNH
 -- ===============================
 CREATE TABLE IF NOT EXISTS "ChiNhanh" (
     "maChiNhanh" VARCHAR(10) PRIMARY KEY,
@@ -13,7 +15,7 @@ CREATE TABLE IF NOT EXISTS "ChiNhanh" (
 );
 
 -- ===============================
--- BẢNG KHÁCH HÀNG (đồng bộ với entity Customer)
+-- BẢNG KHÁCH HÀNG
 -- ===============================
 CREATE TABLE IF NOT EXISTS "KhachHang" (
     "maKH" VARCHAR(10) PRIMARY KEY,
@@ -21,12 +23,12 @@ CREATE TABLE IF NOT EXISTS "KhachHang" (
     "sdt" VARCHAR(20),
     "email" VARCHAR(100),
     "diaChi" TEXT,
-    "matKhau" VARCHAR(255),  -- Tăng độ dài để lưu mật khẩu đã mã hóa (bcrypt thường ~60-100 ký tự, nhưng để 255 cho an toàn)
-    "role" VARCHAR(50) DEFAULT 'ROLE_CUSTOMER'  -- Thêm cột role từ entity Customer
+    "matKhau" VARCHAR(255),
+    "role" VARCHAR(50) DEFAULT 'ROLE_CUSTOMER'
 );
 
 -- ===============================
--- BẢNG NHÂN VIÊN (đồng bộ với entity Employee)
+-- BẢNG NHÂN VIÊN
 -- ===============================
 CREATE TABLE IF NOT EXISTS "NhanVien" (
     "maNV" VARCHAR(10) PRIMARY KEY,
@@ -34,9 +36,9 @@ CREATE TABLE IF NOT EXISTS "NhanVien" (
     "vaiTro" VARCHAR(50),
     "sdt" VARCHAR(20),
     "email" VARCHAR(100),
-    "matKhau" VARCHAR(255),  -- Tăng độ dài như trên
+    "matKhau" VARCHAR(255),
     "maChiNhanh" VARCHAR(10),
-    "role" VARCHAR(50) DEFAULT 'ROLE_EMPLOYEE',  -- Thêm cột role từ entity Employee
+    "role" VARCHAR(50) DEFAULT 'ROLE_EMPLOYEE',
     CONSTRAINT fk_nv_cn FOREIGN KEY ("maChiNhanh") REFERENCES "ChiNhanh"("maChiNhanh")
 );
 
@@ -78,26 +80,13 @@ CREATE TABLE IF NOT EXISTS "DichVu" (
 );
 
 -- ===============================
--- BẢNG CHI TIẾT LỊCH HẸN - DỊCH VỤ
--- ===============================
-CREATE TABLE IF NOT EXISTS "CT_Lich_DichVu" (
-    "maLich" VARCHAR(10),
-    "maDV" VARCHAR(10),
-    "soLuong" INTEGER,
-    "ghiChu" TEXT,
-    PRIMARY KEY ("maLich", "maDV"),
-    CONSTRAINT fk_ct_lich FOREIGN KEY ("maLich") REFERENCES "LichHen"("maLich"),
-    CONSTRAINT fk_ct_dv FOREIGN KEY ("maDV") REFERENCES "DichVu"("maDV")
-);
-
--- ===============================
 -- BẢNG PHỤ TÙNG
 -- ===============================
 CREATE TABLE IF NOT EXISTS "PhuTung" (
     "maPT" VARCHAR(10) PRIMARY KEY,
-    "tenPT" VARCHAR(255),
-    "donGia" NUMERIC(14,2),
-    "soLuongTon" INTEGER DEFAULT 0,
+    "tenPT" VARCHAR(100) NOT NULL,
+    "donGia" NUMERIC(14,2) NOT NULL,
+    "soLuongTon" INTEGER NOT NULL DEFAULT 0,
     "hinhAnh" VARCHAR(255)
 );
 
@@ -105,27 +94,46 @@ CREATE TABLE IF NOT EXISTS "PhuTung" (
 -- BẢNG PHIẾU SỬA CHỮA
 -- ===============================
 CREATE TABLE IF NOT EXISTS "PhieuSuaChua" (
-    "maPhieu" VARCHAR(10) PRIMARY KEY,
+    "maPhieu" VARCHAR(20) PRIMARY KEY,                    -- đồng bộ với entity Repair (length = 20)
     "maLich" VARCHAR(10),
     "maNV" VARCHAR(10),
     "ngayLap" DATE,
     "ghiChu" TEXT,
-    "trangThai" VARCHAR(50),
+    "trangThai" VARCHAR(50) DEFAULT 'Chờ tiếp nhận',
+    "thanhToanStatus" VARCHAR(50) DEFAULT 'Chưa thanh toán',
+    "tongTien" NUMERIC(14,2) DEFAULT 0.0,
     CONSTRAINT fk_phieu_lich FOREIGN KEY ("maLich") REFERENCES "LichHen"("maLich"),
     CONSTRAINT fk_phieu_nv FOREIGN KEY ("maNV") REFERENCES "NhanVien"("maNV")
 );
 
 -- ===============================
+-- BẢNG CHI TIẾT SỬA CHỮA - DỊCH VỤ
+-- ===============================
+CREATE TABLE IF NOT EXISTS "CT_SuaChua_DichVu" (
+    "maPhieu" VARCHAR(20) NOT NULL,
+    "maDV" VARCHAR(10) NOT NULL,
+    "soLuong" INTEGER,
+    "ghiChu" TEXT,
+    "thanhTien" NUMERIC(12,2),
+    PRIMARY KEY ("maPhieu", "maDV"),
+    CONSTRAINT fk_ct_suachua_phieu FOREIGN KEY ("maPhieu") REFERENCES "PhieuSuaChua"("maPhieu") ON DELETE CASCADE,
+    CONSTRAINT fk_ct_suachua_dv FOREIGN KEY ("maDV") REFERENCES "DichVu"("maDV") ON DELETE RESTRICT
+);
+
+CREATE INDEX IF NOT EXISTS idx_ct_suachua_phieu ON "CT_SuaChua_DichVu"("maPhieu");
+CREATE INDEX IF NOT EXISTS idx_ct_suachua_dv ON "CT_SuaChua_DichVu"("maDV");
+
+-- ===============================
 -- BẢNG CHI TIẾT SỬA CHỮA - PHỤ TÙNG
 -- ===============================
 CREATE TABLE IF NOT EXISTS "CT_SuaChua_PhuTung" (
-    "maPhieu" VARCHAR(10),
-    "maPT" VARCHAR(10),
+    "maPhieu" VARCHAR(20) NOT NULL,
+    "maPT" VARCHAR(10) NOT NULL,
     "soLuong" INTEGER,
     "thanhTien" NUMERIC(12,2),
     PRIMARY KEY ("maPhieu", "maPT"),
-    CONSTRAINT fk_ct_phieu FOREIGN KEY ("maPhieu") REFERENCES "PhieuSuaChua"("maPhieu"),
-    CONSTRAINT fk_ct_pt FOREIGN KEY ("maPT") REFERENCES "PhuTung"("maPT")
+    CONSTRAINT fk_ct_phutung_phieu FOREIGN KEY ("maPhieu") REFERENCES "PhieuSuaChua"("maPhieu") ON DELETE CASCADE,
+    CONSTRAINT fk_ct_phutung_pt FOREIGN KEY ("maPT") REFERENCES "PhuTung"("maPT") ON DELETE RESTRICT
 );
 
 -- ===============================
@@ -149,14 +157,14 @@ CREATE TABLE IF NOT EXISTS "PhanHoi" (
 CREATE TABLE IF NOT EXISTS "BaoCao" (
     "maBC" VARCHAR(10) PRIMARY KEY,
     "maChiNhanh" VARCHAR(10),
-    "thangNam" VARCHAR(10),  -- Có thể đổi thành DATE hoặc riêng cột năm/tháng nếu cần
+    "thangNam" VARCHAR(10),
     "doanhThu" NUMERIC(14,2),
     "soXePhucVu" INTEGER,
     CONSTRAINT fk_bc_cn FOREIGN KEY ("maChiNhanh") REFERENCES "ChiNhanh"("maChiNhanh") ON DELETE SET NULL
 );
 
 -- ===============================
--- BẢNG THÔNG TIN DỊCH VỤ (dùng cho RAG Chatbot)
+-- BẢNG THÔNG TIN DỊCH VỤ (RAG)
 -- ===============================
 CREATE TABLE IF NOT EXISTS "ThongTinDichVu" (
     "id" SERIAL PRIMARY KEY,
@@ -165,15 +173,12 @@ CREATE TABLE IF NOT EXISTS "ThongTinDichVu" (
     "content" TEXT NOT NULL,
     "category" VARCHAR(100),
     "embedding" vector(768),
-    "created_at" TIMESTAMP NOT NULL DEFAULT NOW(),
+    "created_at" TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updated_at" TIMESTAMP
 );
 
--- Index cho vector search
 CREATE INDEX IF NOT EXISTS embedding_idx ON "ThongTinDichVu"
-    USING ivfflat (embedding vector_cosine_ops)
-    WITH (lists = 100);
+    USING ivfflat (embedding vector_cosine_ops) WITH (lists = 100);
 
--- Index cho full-text search
 CREATE INDEX IF NOT EXISTS title_content_idx ON "ThongTinDichVu"
     USING gin(to_tsvector('english', title || ' ' || content));

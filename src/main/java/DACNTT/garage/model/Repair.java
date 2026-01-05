@@ -4,7 +4,6 @@ import jakarta.persistence.*;
 import lombok.*;
 import java.time.LocalDate;
 
-// Repair.java
 @Entity
 @Getter
 @Setter
@@ -30,4 +29,9 @@ public class Repair {
 
     @Column(columnDefinition = "VARCHAR(50) DEFAULT 'Chờ tiếp nhận'")
     private String trangThai = "Chờ tiếp nhận";
+
+    @Column(columnDefinition = "VARCHAR(50) DEFAULT 'Chưa thanh toán'")
+    private String thanhToanStatus = "Chưa thanh toán";
+
+    private Double tongTien = 0.0;
 }

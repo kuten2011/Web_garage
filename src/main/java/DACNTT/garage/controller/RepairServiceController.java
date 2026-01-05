@@ -15,13 +15,11 @@ public class RepairServiceController {
     @Autowired
     private RepairServiceHandle repairServiceHandle;
 
-    // THÊM ENDPOINT NÀY – LẤY DANH SÁCH DỊCH VỤ THEO PHIẾU
     @GetMapping("/phieu/{maPhieu}")
     public ResponseEntity<List<RepairServiceDTO>> getServicesByPhieu(@PathVariable String maPhieu) {
         return repairServiceHandle.getServicesByPhieu(maPhieu);
     }
 
-    // Thêm dịch vụ vào phiếu
     @PostMapping("/phieu/{maPhieu}")
     public ResponseEntity<RepairServiceDTO> addService(
             @PathVariable String maPhieu,
@@ -30,7 +28,6 @@ public class RepairServiceController {
         return repairServiceHandle.addService(dto);
     }
 
-    // Xóa dịch vụ khỏi phiếu
     @DeleteMapping("/phieu/{maPhieu}/dichvu/{maDV}")
     public ResponseEntity<Void> removeService(
             @PathVariable String maPhieu,

@@ -1,8 +1,17 @@
 import React, { useState, useEffect, useMemo } from "react";
-import axiosInstance from "../../api/axiosInstance"; 
+import axiosInstance from "../../api/axiosInstance";
 import {
-  Plus, Search, Wrench, CalendarDays, User, Edit3, Trash2,
-  ChevronLeft, ChevronRight, ClipboardList
+  Plus,
+  Search,
+  Wrench,
+  CalendarDays,
+  User,
+  Edit3,
+  Trash2,
+  ChevronLeft,
+  ChevronRight,
+  ClipboardList,
+  CreditCard,
 } from "lucide-react";
 import { Link } from "react-router-dom";
 
@@ -20,14 +29,18 @@ export default function RepairManager() {
   const [editingItem, setEditingItem] = useState(null);
 
   const [formData, setFormData] = useState({
-    maLich: "", maNV: "", ngayLap: "", ghiChu: "", trangThai: "Đang sửa"
+    maLich: "",
+    maNV: "",
+    ngayLap: "",
+    ghiChu: "",
+    trangThai: "Chờ tiếp nhận",
   });
 
   const fetchData = async () => {
     try {
       setLoading(true);
       const res = await axiosInstance.get(API, {
-        params: { page, size: PAGE_SIZE, sort: "ngayLap,desc" }
+        params: { page, size: PAGE_SIZE, sort: "ngayLap,desc" },
       });
       setData(res.data);
     } catch (err) {
@@ -42,26 +55,29 @@ export default function RepairManager() {
     fetchData();
   }, [page]);
 
+  // Lọc dữ liệu theo search và filter
   const filteredData = useMemo(() => {
     let items = data.content || [];
 
     if (searchTerm) {
       const term = searchTerm.toLowerCase();
-      items = items.filter(item =>
-        item.maPhieu?.toLowerCase().includes(term) ||
-        item.maLich?.toLowerCase().includes(term) ||
-        item.maNV?.toLowerCase().includes(term) ||
-        item.tenNV?.toLowerCase().includes(term)
+      items = items.filter(
+        (item) =>
+          item.maPhieu?.toLowerCase().includes(term) ||
+          item.maLich?.toLowerCase().includes(term) ||
+          item.maNV?.toLowerCase().includes(term) ||
+          item.khachHang?.hoTen?.toLowerCase().includes(term)
       );
     }
 
     if (filterStatus !== "Tất cả") {
-      items = items.filter(item => item.trangThai === filterStatus);
+      items = items.filter((item) => item.trangThai === filterStatus);
     }
 
     return items;
   }, [data.content, searchTerm, filterStatus]);
 
+  // Cập nhật trạng thái phiếu
   const updateStatus = async (maPhieu, newStatus) => {
     try {
       await axiosInstance.patch(`${API}/${maPhieu}/status`, { trangThai: newStatus });
@@ -71,8 +87,9 @@ export default function RepairManager() {
     }
   };
 
+  // Xóa phiếu
   const handleDelete = async (maPhieu) => {
-    if (!window.confirm("Xóa phiếu sửa chữa này?")) return;
+    if (!window.confirm("Bạn có chắc muốn xóa phiếu sửa chữa này?")) return;
     try {
       await axiosInstance.delete(`${API}/${maPhieu}`);
       fetchData();
@@ -81,6 +98,7 @@ export default function RepairManager() {
     }
   };
 
+  // Mở form thêm/sửa
   const openForm = (item = null) => {
     if (item) {
       setEditingItem(item);
@@ -89,25 +107,30 @@ export default function RepairManager() {
         maNV: item.maNV || "",
         ngayLap: item.ngayLap || "",
         ghiChu: item.ghiChu || "",
-        trangThai: item.trangThai || "Đang sửa"
+        trangThai: item.trangThai || "Chờ tiếp nhận",
       });
     } else {
       setEditingItem(null);
       setFormData({
-        maLich: "", maNV: "", ngayLap: "", ghiChu: "", trangThai: "Đang sửa"
+        maLich: "",
+        maNV: "",
+        ngayLap: "",
+        ghiChu: "",
+        trangThai: "Chờ tiếp nhận",
       });
     }
     setShowForm(true);
   };
 
+  // Lưu phiếu (thêm hoặc sửa)
   const handleSave = async () => {
     try {
       if (editingItem) {
         await axiosInstance.put(`${API}/${editingItem.maPhieu}`, formData);
-        alert("Cập nhật thành công!");
+        alert("Cập nhật phiếu thành công!");
       } else {
         await axiosInstance.post(API, formData);
-        alert("Thêm phiếu thành công! Mã phiếu đã được tạo tự động.");
+        alert("Thêm phiếu mới thành công!");
       }
       setShowForm(false);
       fetchData();
@@ -116,29 +139,44 @@ export default function RepairManager() {
     }
   };
 
+  // Lấy màu trạng thái thanh toán
+  const getPaymentStatusColor = (status) => {
+    switch (status) {
+      case "Đã thanh toán":
+        return "bg-green-100 text-green-800";
+      case "Chờ chuyển khoản":
+        return "bg-orange-100 text-orange-800";
+      default:
+        return "bg-red-100 text-red-800";
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gray-50 py-8 px-4">
       <div className="max-w-7xl mx-auto">
-
+        {/* Header */}
         <div className="mb-8 flex justify-between items-center">
           <h1 className="text-4xl font-bold text-gray-800 flex items-center gap-4">
+            <Wrench size={40} className="text-indigo-600" />
             Quản Lý Phiếu Sửa Chữa
           </h1>
           <button
             onClick={() => openForm()}
             className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white px-6 py-3 rounded-xl font-semibold flex items-center gap-3 shadow-lg hover:shadow-xl transition transform hover:-translate-y-0.5"
           >
-            <Plus size={22} /> Thêm phiếu mới
+            <Plus size={22} />
+            Thêm phiếu mới
           </button>
         </div>
 
+        {/* Tìm kiếm & lọc */}
         <div className="bg-white rounded-2xl shadow-lg p-6 mb-8">
           <div className="flex flex-col lg:flex-row gap-4">
             <div className="flex-1 relative">
               <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
               <input
                 type="text"
-                placeholder="Tìm mã phiếu, mã lịch, mã NV..."
+                placeholder="Tìm mã phiếu, mã lịch, nhân viên, khách hàng..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="w-full pl-12 pr-6 py-4 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 text-gray-700"
@@ -150,13 +188,14 @@ export default function RepairManager() {
               className="px-6 py-4 border border-gray-200 rounded-xl bg-white font-medium text-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-500"
             >
               <option value="Tất cả">Tất cả trạng thái</option>
-              <option value="Chờ xác nhận">Chờ xác nhận</option>
+              <option value="Chờ tiếp nhận">Chờ tiếp nhận</option>
               <option value="Đang sửa">Đang sửa</option>
               <option value="Hoàn thành">Hoàn thành</option>
             </select>
           </div>
         </div>
 
+        {/* Bảng danh sách */}
         <div className="bg-white rounded-2xl shadow-xl overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full">
@@ -165,10 +204,11 @@ export default function RepairManager() {
                   <th className="px-6 py-5 text-left font-semibold">Mã Phiếu</th>
                   <th className="px-6 py-5 text-left font-semibold">Mã Lịch</th>
                   <th className="px-6 py-5 text-left font-semibold">Nhân Viên</th>
+                  <th className="px-6 py-5 text-left font-semibold">Khách Hàng</th>
                   <th className="px-6 py-5 text-center font-semibold">Ngày Lập</th>
-                  <th className="px-6 py-5 text-left font-semibold">Ghi Chú</th>
                   <th className="px-6 py-5 text-center font-semibold">Trạng Thái</th>
-                  <th className="px-6 py-5 text-center font-semibold">Xem</th>
+                  <th className="px-6 py-5 text-center font-semibold">Thanh Toán</th>
+                  <th className="px-6 py-5 text-center font-semibold">Xem Chi Tiết</th>
                   <th className="px-6 py-5 text-center font-semibold">Thao Tác</th>
                 </tr>
               </thead>
@@ -176,14 +216,14 @@ export default function RepairManager() {
               <tbody className="divide-y divide-gray-200">
                 {loading ? (
                   <tr>
-                    <td colSpan="8" className="text-center py-16 text-gray-500 text-lg">
+                    <td colSpan="9" className="text-center py-16 text-gray-500 text-lg">
                       Đang tải dữ liệu...
                     </td>
                   </tr>
                 ) : filteredData.length === 0 ? (
                   <tr>
-                    <td colSpan="8" className="text-center py-16 text-gray-400 text-xl font-medium">
-                      Không có phiếu sửa chữa
+                    <td colSpan="9" className="text-center py-16 text-gray-400 text-xl font-medium">
+                      Không có phiếu sửa chữa nào
                     </td>
                   </tr>
                 ) : (
@@ -206,12 +246,15 @@ export default function RepairManager() {
                             <User size={20} className="text-indigo-600" />
                             <div>
                               <div className="font-semibold">{r.maNV}</div>
-                              {r.tenNV && <div className="text-sm text-gray-600">{r.tenNV}</div>}
                             </div>
                           </div>
                         ) : (
                           <span className="text-gray-400 italic">Chưa phân công</span>
                         )}
+                      </td>
+
+                      <td className="px-6 py-5">
+                        <span className="font-medium">{r.khachHang?.hoTen || "N/A"}</span>
                       </td>
 
                       <td className="px-6 py-5 text-center">
@@ -220,8 +263,6 @@ export default function RepairManager() {
                           <span className="font-medium">{r.ngayLap || "-"}</span>
                         </div>
                       </td>
-
-                      <td className="px-6 py-5 text-sm text-gray-700 max-w-xs">{r.ghiChu || "-"}</td>
 
                       <td className="px-6 py-5 text-center">
                         <select
@@ -235,19 +276,29 @@ export default function RepairManager() {
                               : "bg-orange-100 text-orange-800"
                           }`}
                         >
-                          <option value="Chờ xác nhận">Chờ xác nhận</option>
+                          <option value="Chờ tiếp nhận">Chờ tiếp nhận</option>
                           <option value="Đang sửa">Đang sửa</option>
                           <option value="Hoàn thành">Hoàn thành</option>
                         </select>
                       </td>
+
+                      {/* Cột trạng thái thanh toán */}
+                      <td className="px-6 py-5 text-center">
+                        <span className={`px-4 py-2 rounded-full text-xs font-bold ${getPaymentStatusColor(r.thanhToanStatus)}`}>
+                          {r.thanhToanStatus || "Chưa thanh toán"}
+                        </span>
+                      </td>
+
                       <td className="px-6 py-5 text-center">
                         <Link
                           to={`/admin/repairParts/${r.maPhieu}`}
-                          className="text-indigo-600 hover:text-indigo-800 font-bold underline"
+                          className="inline-flex items-center gap-2 text-indigo-600 hover:text-indigo-800 font-bold underline"
                         >
+                          <CreditCard size={18} />
                           Xem chi tiết
                         </Link>
                       </td>
+
                       <td className="px-6 py-5 text-center">
                         <div className="flex justify-center gap-5">
                           <button
@@ -266,7 +317,6 @@ export default function RepairManager() {
                           </button>
                         </div>
                       </td>
-
                     </tr>
                   ))
                 )}
@@ -274,10 +324,11 @@ export default function RepairManager() {
             </table>
           </div>
 
+          {/* Phân trang */}
           {data.totalPages > 1 && (
             <div className="flex justify-center items-center gap-3 py-6 bg-gray-50">
               <button
-                onClick={() => setPage(p => Math.max(0, p - 1))}
+                onClick={() => setPage((p) => Math.max(0, p - 1))}
                 disabled={page === 0}
                 className="p-3 rounded-lg bg-white shadow hover:bg-gray-100 disabled:opacity-50"
               >
@@ -301,7 +352,7 @@ export default function RepairManager() {
               </div>
 
               <button
-                onClick={() => setPage(p => Math.min(data.totalPages - 1, p + 1))}
+                onClick={() => setPage((p) => Math.min(data.totalPages - 1, p + 1))}
                 disabled={page === data.totalPages - 1}
                 className="p-3 rounded-lg bg-white shadow hover:bg-gray-100 disabled:opacity-50"
               >
@@ -311,6 +362,7 @@ export default function RepairManager() {
           )}
         </div>
 
+        {/* Form thêm/sửa phiếu */}
         {showForm && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
             <div className="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-2xl">
@@ -350,7 +402,7 @@ export default function RepairManager() {
                   onChange={(e) => setFormData({ ...formData, trangThai: e.target.value })}
                   className="px-5 py-4 border-2 border-gray-300 rounded-xl focus:ring-4 focus:ring-purple-300 font-medium"
                 >
-                  <option value="Chờ xác nhận">Chờ xác nhận</option>
+                  <option value="Chờ tiếp nhận">Chờ tiếp nhận</option>
                   <option value="Đang sửa">Đang sửa</option>
                   <option value="Hoàn thành">Hoàn thành</option>
                 </select>
@@ -381,7 +433,6 @@ export default function RepairManager() {
             </div>
           </div>
         )}
-
       </div>
     </div>
   );
