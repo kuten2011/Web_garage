@@ -1,9 +1,13 @@
 package DACNTT.garage.controller.security;
 
+import DACNTT.garage.dto.CustomerDTO;
 import DACNTT.garage.dto.security.JwtResponse;
 import DACNTT.garage.dto.security.LoginRequest;
+import DACNTT.garage.dto.security.RegisterRequest;
+import DACNTT.garage.handle.CustomerHandle;
 import DACNTT.garage.security.JwtUtils;
 import DACNTT.garage.security.UserDetailsImpl;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -15,6 +19,9 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/web_garage/auth")
 public class AuthController {
+
+    @Autowired
+    private CustomerHandle customerHandle;
 
     private final AuthenticationManager authenticationManager;
     private final JwtUtils jwtUtils;
@@ -48,4 +55,11 @@ public class AuthController {
 
         return ResponseEntity.ok(new JwtResponse(jwt, userDetails.getUsername(), userDetails.getAuthorities()));
     }
+
+    @PostMapping("/register")
+    public ResponseEntity<?> register(
+            @RequestBody RegisterRequest request) {
+        return customerHandle.registerCustomer(request);
+    }
+
 }
