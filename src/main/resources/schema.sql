@@ -56,17 +56,16 @@ CREATE TABLE IF NOT EXISTS "Xe" (
 );
 
 -- ===============================
--- BẢNG LỊCH HẸN
+-- BẢNG LỊCH HẸN (ĐÃ XÓA bienSo VÀ FK XE)
 -- ===============================
 CREATE TABLE IF NOT EXISTS "LichHen" (
     "maLich" VARCHAR(10) PRIMARY KEY,
     "maKH" VARCHAR(10),
-    "bienSo" VARCHAR(10),
     "ngayHen" DATE,
     "gioHen" TIME,
     "trangThai" VARCHAR(50),
-    CONSTRAINT fk_lich_kh FOREIGN KEY ("maKH") REFERENCES "KhachHang"("maKH"),
-    CONSTRAINT fk_lich_xe FOREIGN KEY ("bienSo") REFERENCES "Xe"("bienSo")
+    "ghiChu" TEXT,
+    CONSTRAINT fk_lich_kh FOREIGN KEY ("maKH") REFERENCES "KhachHang"("maKH")
 );
 
 -- ===============================
@@ -91,10 +90,10 @@ CREATE TABLE IF NOT EXISTS "PhuTung" (
 );
 
 -- ===============================
--- BẢNG PHIẾU SỬA CHỮA
+-- BẢNG PHIẾU SỬA CHỮA (ĐÃ THÊM bienSo + FK ĐẾN XE)
 -- ===============================
 CREATE TABLE IF NOT EXISTS "PhieuSuaChua" (
-    "maPhieu" VARCHAR(20) PRIMARY KEY,                    -- đồng bộ với entity Repair (length = 20)
+    "maPhieu" VARCHAR(20) PRIMARY KEY,
     "maLich" VARCHAR(10),
     "maNV" VARCHAR(10),
     "ngayLap" DATE,
@@ -102,8 +101,10 @@ CREATE TABLE IF NOT EXISTS "PhieuSuaChua" (
     "trangThai" VARCHAR(50) DEFAULT 'Chờ tiếp nhận',
     "thanhToanStatus" VARCHAR(50) DEFAULT 'Chưa thanh toán',
     "tongTien" NUMERIC(14,2) DEFAULT 0.0,
+    "bienSo" VARCHAR(10),  -- THÊM CỘT BIỂN SỐ XE
     CONSTRAINT fk_phieu_lich FOREIGN KEY ("maLich") REFERENCES "LichHen"("maLich"),
-    CONSTRAINT fk_phieu_nv FOREIGN KEY ("maNV") REFERENCES "NhanVien"("maNV")
+    CONSTRAINT fk_phieu_nv FOREIGN KEY ("maNV") REFERENCES "NhanVien"("maNV"),
+    CONSTRAINT fk_phieu_xe FOREIGN KEY ("bienSo") REFERENCES "Xe"("bienSo")  -- THÊM FK ĐẾN BẢNG XE
 );
 
 -- ===============================
@@ -141,16 +142,16 @@ CREATE TABLE IF NOT EXISTS "CT_SuaChua_PhuTung" (
 -- ===============================
 CREATE TABLE IF NOT EXISTS "PhanHoi" (
     "maPhanHoi" VARCHAR(10) PRIMARY KEY,
-    "maKH" VARCHAR(10),
+    "maPSC" VARCHAR(20) NOT NULL,
     "noiDung" TEXT,
+    "soSao" INTEGER CHECK ("soSao" >= 1 AND "soSao" <= 5),
     "ngayGui" TIMESTAMP,
-    "trangThai" VARCHAR(50),
-    "maNVXL" VARCHAR(10),
+    "trangThai" VARCHAR(50) DEFAULT 'Chưa phản hồi',
     "phanHoiQL" TEXT,
-    CONSTRAINT fk_phanhoi_kh FOREIGN KEY ("maKH") REFERENCES "KhachHang"("maKH"),
-    CONSTRAINT fk_phanhoi_nv FOREIGN KEY ("maNVXL") REFERENCES "NhanVien"("maNV")
-);
 
+    CONSTRAINT fk_phanhoi_phieusuachua
+        FOREIGN KEY ("maPSC") REFERENCES "PhieuSuaChua"("maPhieu") ON DELETE CASCADE
+);
 -- ===============================
 -- BẢNG BÁO CÁO
 -- ===============================

@@ -18,6 +18,7 @@ public interface BookingService {
     );
     List<Booking> getAllBookings();
     Booking addBooking(Booking booking);
+    Booking addBookingCustomer(Booking booking);
     Booking updateBooking(String maLich, BookingDTO dto);
     Booking updateStatus(String maLich, String trangThai);
     void deleteBooking(String maLich);

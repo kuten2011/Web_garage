@@ -46,6 +46,18 @@ public class BookingHandle {
         }
     }
 
+    public ResponseEntity<?> addBookingCustomer(BookingDTO bookingDTO) {
+        try {
+            Booking booking = bookingMapper.toEntity(bookingDTO);
+            Booking saved = bookingService.addBookingCustomer(booking);
+            BookingDTO result = bookingMapper.toBookingDTO(saved);
+            return ResponseEntity.status(HttpStatus.CREATED).body(result);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Lỗi khi tạo booking: " + e.getMessage());
+        }
+    }
+
     public ResponseEntity<?> updateBooking(String maLich, BookingDTO bookingDTO) {
         try {
             Booking updated = bookingService.updateBooking(maLich, bookingDTO);

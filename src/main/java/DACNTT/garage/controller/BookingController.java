@@ -15,13 +15,12 @@ import org.springframework.web.bind.annotation.*;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/admin/bookings")
 public class BookingController {
 
     @Autowired
     private BookingHandle bookingHandle;
 
-    @GetMapping
+    @GetMapping("/admin/bookings")
     public ResponseEntity<Page<BookingDTO>> searchBookings(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
@@ -37,7 +36,7 @@ public class BookingController {
                 dateFrom, dateTo, loaiDichVu, sortBy, sortDir);
     }
 
-    @GetMapping("/all")
+    @GetMapping("/admin/bookings/all")
     public ResponseEntity<Page<BookingDTO>> getBookings(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
@@ -45,19 +44,24 @@ public class BookingController {
         return bookingHandle.getBookings(page, size, sort);
     }
 
-    @PostMapping
+    @PostMapping("/customer/bookings")
+    public ResponseEntity<?> addBookingCustomer(@RequestBody BookingDTO bookingDTO) {
+        return bookingHandle.addBookingCustomer(bookingDTO);
+    }
+
+    @PostMapping("/admin/bookings")
     public ResponseEntity<?> addBooking(@RequestBody BookingDTO bookingDTO) {
         return bookingHandle.addBooking(bookingDTO);
     }
 
-    @PutMapping("/{maLich}")
+    @PutMapping("/admin/bookings/{maLich}")
     public ResponseEntity<?> updateBooking(
             @PathVariable String maLich,
             @RequestBody BookingDTO bookingDTO) {
         return bookingHandle.updateBooking(maLich, bookingDTO);
     }
 
-    @PatchMapping("/{maLich}/status")
+    @PatchMapping("/admin/bookings/{maLich}/status")
     public ResponseEntity<?> updateStatus(
             @PathVariable String maLich,
             @RequestBody Map<String, String> body) {
@@ -69,7 +73,7 @@ public class BookingController {
         return bookingHandle.updateStatus(maLich, trangThai);
     }
 
-    @DeleteMapping("/{maLich}")
+    @DeleteMapping("/admin/bookings/{maLich}")
     public ResponseEntity<?> deleteBooking(@PathVariable String maLich) {
         return bookingHandle.deleteBooking(maLich);
     }

@@ -11,16 +11,18 @@ public interface RepairMapper {
 
     @Mapping(source = "lichHen.maLich", target = "maLich")
     @Mapping(source = "nhanVien.maNV", target = "maNV")
-    @Mapping(target = "khachHang", source = "lichHen.khachHang")
-    @Mapping(target = "xe", source = "lichHen.xe")
+    @Mapping(source = "xe.bienSo", target = "bienSo")
+    @Mapping(source = "lichHen.khachHang", target = "khachHang")
+    @Mapping(source = "xe", target = "xe")
     RepairDTO toRepairDTO(Repair repair);
 
     @Mapping(source = "maLich", target = "lichHen.maLich")
     @Mapping(source = "maNV", target = "nhanVien.maNV")
+    @Mapping(source = "bienSo", target = "xe.bienSo")
     Repair toRepair(RepairDTO dto);
 
-    // Optional: Để update entity từ DTO
     @Mapping(target = "lichHen", ignore = true)
     @Mapping(target = "nhanVien", ignore = true)
+    @Mapping(target = "xe", ignore = true)
     void updateRepairFromDTO(RepairDTO dto, @MappingTarget Repair repair);
 }

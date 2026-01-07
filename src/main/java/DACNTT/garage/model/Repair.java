@@ -5,13 +5,12 @@ import lombok.*;
 import java.time.LocalDate;
 
 @Entity
-@Getter
-@Setter
 @Table(name = "PhieuSuaChua")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 public class Repair {
+
     @Id
     @Column(name = "maPhieu", length = 20)
     private String maPhieu;
@@ -23,6 +22,10 @@ public class Repair {
     @ManyToOne
     @JoinColumn(name = "maNV")
     private Employee nhanVien;
+
+    @ManyToOne
+    @JoinColumn(name = "bienSo")
+    private Vehicle xe;
 
     private LocalDate ngayLap;
     private String ghiChu;

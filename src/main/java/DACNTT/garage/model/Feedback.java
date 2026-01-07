@@ -9,6 +9,7 @@ import java.time.LocalDateTime;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 public class Feedback {
 
     @Id
@@ -16,16 +17,19 @@ public class Feedback {
     private String maPhanHoi;
 
     @ManyToOne
-    @JoinColumn(name = "maKH")
-    private Customer khachHang;
+    @JoinColumn(name = "maPSC", nullable = false)
+    private Repair phieuSuaChua;
 
+    @Column(nullable = false)
     private String noiDung;
-    private LocalDateTime ngayGui;
-    private String trangThai;
 
-    @ManyToOne
-    @JoinColumn(name = "maNVXL", nullable = true)
-    private Employee nhanVienXuLy;
+    @Column(nullable = false)
+    private Integer soSao;
+
+    @Column(nullable = false)
+    private LocalDateTime ngayGui = LocalDateTime.now();
+
+    private String trangThai = "Chưa phản hồi";
 
     private String phanHoiQL;
 }

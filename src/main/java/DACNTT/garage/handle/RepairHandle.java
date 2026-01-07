@@ -2,8 +2,14 @@ package DACNTT.garage.handle;
 
 import DACNTT.garage.dto.RepairDTO;
 import DACNTT.garage.mapper.RepairMapper;
+import DACNTT.garage.model.Booking;
+import DACNTT.garage.model.Employee;
 import DACNTT.garage.model.Repair;
+import DACNTT.garage.model.Vehicle;
+import DACNTT.garage.repository.*;
+import DACNTT.garage.service.RepairPartService;
 import DACNTT.garage.service.RepairService;
+import DACNTT.garage.service.RepairServiceService;
 import org.hibernate.Hibernate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.*;
@@ -13,6 +19,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Component
 public class RepairHandle {
@@ -22,6 +29,30 @@ public class RepairHandle {
 
     @Autowired
     private RepairMapper repairMapper;
+
+    @Autowired
+    private RepairServiceService repairServiceService;
+
+    @Autowired
+    private RepairPartService repairPartService;
+
+    @Autowired
+    private VehicleRepository vehicleRepository;
+
+    @Autowired
+    private BookingRepository bookingRepository;
+
+    @Autowired
+    private EmployeeRepository employeeRepository;
+
+    @Autowired
+    private RepairRepository repairRepository;
+
+    @Autowired
+    private FeedbackRepository feedbackRepository;
+
+    @Autowired
+    private CustomerRepository customerRepository;
 
     public ResponseEntity<Page<RepairDTO>> getAllRepairs(int page, int size, String sort) {
         Sort sortable = Sort.by(Sort.Direction.DESC, "ngayLap");
@@ -50,13 +81,44 @@ public class RepairHandle {
                 return ResponseEntity.badRequest().build();
             }
 
-            Repair repair = repairMapper.toRepair(dto);
-            Repair saved = repairService.createRepair(repair);
-            return ResponseEntity.status(HttpStatus.CREATED)
-                    .body(repairMapper.toRepairDTO(saved));
+            Booking lichHen = bookingRepository.findById(dto.getMaLich())
+                    .orElseThrow(() -> new RuntimeException("Không tìm thấy lịch hẹn: " + dto.getMaLich()));
 
+            Employee nhanVien = null;
+            if (dto.getMaNV() != null && !dto.getMaNV().isBlank()) {
+                nhanVien = employeeRepository.findById(dto.getMaNV())
+                        .orElseThrow(() -> new RuntimeException("Không tìm thấy nhân viên: " + dto.getMaNV()));
+            }
+
+            Repair repair = repairMapper.toRepair(dto);
+            repair.setLichHen(lichHen);
+            repair.setNhanVien(nhanVien);
+
+            if (dto.getBienSo() != null && !dto.getBienSo().trim().isEmpty()) {
+                Vehicle xe = vehicleRepository.findById(dto.getBienSo().trim())
+                        .orElseThrow(() -> new RuntimeException("Không tìm thấy xe với biển số: " + dto.getBienSo()));
+                repair.setXe(xe);
+            }
+            Repair saved = repairService.createRepair(repair);
+
+            double tongDV = repairServiceService.sumThanhTienByMaPhieu(saved.getMaPhieu());
+            double tongPT = repairPartService.sumThanhTienByMaPhieu(saved.getMaPhieu());
+            double tongTien = tongDV + tongPT;
+
+            RepairDTO resultDTO = repairMapper.toRepairDTO(saved);
+            resultDTO.setTongTien(tongTien);
+            if (resultDTO.getThanhToanStatus() == null) {
+                resultDTO.setThanhToanStatus("Chưa thanh toán");
+            }
+
+            return ResponseEntity.status(HttpStatus.CREATED).body(resultDTO);
+
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest()
+                    .body(RepairDTO.builder().ghiChu("Lỗi: " + e.getMessage()).build());
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
 
@@ -142,14 +204,64 @@ public class RepairHandle {
     }
 
     public RepairDTO getRepairDTOById(String maPhieu) {
-        Repair repair = repairService.getRepairById(maPhieu);
-        if (repair == null) return null;
+        Repair repair = repairService.findById(maPhieu);
 
         RepairDTO dto = repairMapper.toRepairDTO(repair);
 
-        dto.setTongTien(0.0);
-        dto.setThanhToanStatus(repair.getThanhToanStatus() != null ? repair.getThanhToanStatus() : "Chưa thanh toán");
+        double tongDV = repairServiceService.sumThanhTienByMaPhieu(maPhieu);
+        double tongPT = repairPartService.sumThanhTienByMaPhieu(maPhieu);
+        double tongTien = tongDV + tongPT;
+
+        dto.setTongTien(tongTien);
+
+        if (dto.getThanhToanStatus() == null) {
+            dto.setThanhToanStatus("Chưa thanh toán");
+        }
 
         return dto;
+    }
+
+//    public Page<RepairDTO> getRepairsByMaKH(String maKH, Pageable pageable) {
+//        Page<Repair> page = repairService.findByMaKH(maKH, pageable);
+//
+//        return page.map(repair -> {
+//            RepairDTO dto = repairMapper.toRepairDTO(repair);
+//            double tongDV = repairServiceService.sumThanhTienByMaPhieu(repair.getMaPhieu());
+//            double tongPT = repairPartService.sumThanhTienByMaPhieu(repair.getMaPhieu());
+//            dto.setTongTien(tongDV + tongPT);
+//            if (dto.getThanhToanStatus() == null) {
+//                dto.setThanhToanStatus("Chưa thanh toán");
+//            }
+//            return dto;
+//        });
+//    }
+
+    public List<RepairDTO> getRepairsByMaKH(String maKH) {
+        List<Repair> repairs = repairRepository.findByLichHen_KhachHang_MaKH(customerRepository.findByEmail(maKH).get().getMaKH());
+
+        return repairs.stream().map(repair -> {
+                    RepairDTO dto = repairMapper.toRepairDTO(repair);
+
+                    // Tính tổng tiền
+                    double tongDV = repairServiceService.sumThanhTienByMaPhieu(repair.getMaPhieu());
+                    double tongPT = repairPartService.sumThanhTienByMaPhieu(repair.getMaPhieu());
+                    dto.setTongTien(tongDV + tongPT);
+
+                    feedbackRepository.findByPhieuSuaChua_MaPhieu(repair.getMaPhieu())
+                            .ifPresent(feedback -> {
+                                dto.setDaDanhGia(true);
+                                dto.setSoSao(feedback.getSoSao());
+                                dto.setNoiDungPhanHoi(feedback.getNoiDung());
+                                dto.setNgayDanhGia(feedback.getNgayGui());
+                                dto.setPhanHoiQL(feedback.getPhanHoiQL());
+                            });
+
+                    if (dto.getThanhToanStatus() == null) {
+                        dto.setThanhToanStatus("Chưa thanh toán");
+                    }
+
+                    return dto;
+                }).sorted((a, b) -> b.getNgayLap().compareTo(a.getNgayLap()))
+                .collect(Collectors.toList());
     }
 }

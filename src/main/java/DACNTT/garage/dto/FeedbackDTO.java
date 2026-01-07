@@ -1,10 +1,6 @@
 package DACNTT.garage.dto;
 
-import DACNTT.garage.model.Customer;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.time.LocalDateTime;
 
@@ -14,12 +10,14 @@ import java.time.LocalDateTime;
 @Builder
 public class FeedbackDTO {
     private String maPhanHoi;
-    private String maKH;
+    private String maPSC;
     private String noiDung;
+    private Integer soSao;
     private LocalDateTime ngayGui;
     private String trangThai;
-    private String maNVXL;
     private String phanHoiQL;
 
-    private Customer khachHang;
+    private String bienSo;
+    private String hoTenKhach;
+    private String maKH;
 }

@@ -6,6 +6,7 @@ import {
   Wrench,
   CalendarDays,
   User,
+  Car,
   Edit3,
   Trash2,
   ChevronLeft,
@@ -34,12 +35,13 @@ export default function RepairManager() {
     ngayLap: "",
     ghiChu: "",
     trangThai: "Chờ tiếp nhận",
+    bienSo: "",
   });
 
   const fetchData = async () => {
     try {
       setLoading(true);
-      const res = await axiosInstance.get(API, {
+      const res = await axiosInstance.get(`${API}`, {
         params: { page, size: PAGE_SIZE, sort: "ngayLap,desc" },
       });
       setData(res.data);
@@ -55,7 +57,7 @@ export default function RepairManager() {
     fetchData();
   }, [page]);
 
-  // Lọc dữ liệu theo search và filter
+  // Lọc dữ liệu
   const filteredData = useMemo(() => {
     let items = data.content || [];
 
@@ -66,7 +68,8 @@ export default function RepairManager() {
           item.maPhieu?.toLowerCase().includes(term) ||
           item.maLich?.toLowerCase().includes(term) ||
           item.maNV?.toLowerCase().includes(term) ||
-          item.khachHang?.hoTen?.toLowerCase().includes(term)
+          item.khachHang?.hoTen?.toLowerCase().includes(term) ||
+          item.xe?.bienSo?.toLowerCase().includes(term)
       );
     }
 
@@ -77,7 +80,6 @@ export default function RepairManager() {
     return items;
   }, [data.content, searchTerm, filterStatus]);
 
-  // Cập nhật trạng thái phiếu
   const updateStatus = async (maPhieu, newStatus) => {
     try {
       await axiosInstance.patch(`${API}/${maPhieu}/status`, { trangThai: newStatus });
@@ -87,7 +89,6 @@ export default function RepairManager() {
     }
   };
 
-  // Xóa phiếu
   const handleDelete = async (maPhieu) => {
     if (!window.confirm("Bạn có chắc muốn xóa phiếu sửa chữa này?")) return;
     try {
@@ -98,7 +99,6 @@ export default function RepairManager() {
     }
   };
 
-  // Mở form thêm/sửa
   const openForm = (item = null) => {
     if (item) {
       setEditingItem(item);
@@ -108,6 +108,7 @@ export default function RepairManager() {
         ngayLap: item.ngayLap || "",
         ghiChu: item.ghiChu || "",
         trangThai: item.trangThai || "Chờ tiếp nhận",
+        bienSo: item.xe?.bienSo || "",
       });
     } else {
       setEditingItem(null);
@@ -117,29 +118,31 @@ export default function RepairManager() {
         ngayLap: "",
         ghiChu: "",
         trangThai: "Chờ tiếp nhận",
+        bienSo: "",
       });
     }
     setShowForm(true);
   };
 
-  // Lưu phiếu (thêm hoặc sửa)
   const handleSave = async () => {
+    if (!formData.maLich.trim()) return alert("Vui lòng nhập mã lịch hẹn!");
+    if (!formData.bienSo.trim()) return alert("Vui lòng nhập biển số xe!");
+
     try {
       if (editingItem) {
         await axiosInstance.put(`${API}/${editingItem.maPhieu}`, formData);
         alert("Cập nhật phiếu thành công!");
       } else {
-        await axiosInstance.post(API, formData);
+        await axiosInstance.post(`${API}`, formData);
         alert("Thêm phiếu mới thành công!");
       }
       setShowForm(false);
       fetchData();
     } catch (err) {
-      alert("Lỗi: " + (err.response?.data?.message || err.message));
+      alert("Lỗi: " + (err.response?.data?.ghiChu || err.response?.data?.message || err.message));
     }
   };
 
-  // Lấy màu trạng thái thanh toán
   const getPaymentStatusColor = (status) => {
     switch (status) {
       case "Đã thanh toán":
@@ -156,36 +159,36 @@ export default function RepairManager() {
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="mb-8 flex justify-between items-center">
-          <h1 className="text-4xl font-bold text-gray-800 flex items-center gap-4">
-            <Wrench size={40} className="text-indigo-600" />
+          <h1 className="text-3xl font-bold text-gray-800 flex items-center gap-3">
+            <Wrench size={32} className="text-indigo-600" />
             Quản Lý Phiếu Sửa Chữa
           </h1>
           <button
             onClick={() => openForm()}
-            className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white px-6 py-3 rounded-xl font-semibold flex items-center gap-3 shadow-lg hover:shadow-xl transition transform hover:-translate-y-0.5"
+            className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white px-5 py-3 rounded-xl font-semibold flex items-center gap-2 shadow-lg hover:shadow-xl transition text-sm"
           >
-            <Plus size={22} />
+            <Plus size={18} />
             Thêm phiếu mới
           </button>
         </div>
 
         {/* Tìm kiếm & lọc */}
-        <div className="bg-white rounded-2xl shadow-lg p-6 mb-8">
-          <div className="flex flex-col lg:flex-row gap-4">
+        <div className="bg-white rounded-2xl shadow p-5 mb-6">
+          <div className="flex flex-col md:flex-row gap-4">
             <div className="flex-1 relative">
-              <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
+              <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
               <input
                 type="text"
-                placeholder="Tìm mã phiếu, mã lịch, nhân viên, khách hàng..."
+                placeholder="Tìm mã phiếu, lịch, nhân viên, khách, biển số..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-12 pr-6 py-4 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 text-gray-700"
+                className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-400 text-sm"
               />
             </div>
             <select
               value={filterStatus}
               onChange={(e) => setFilterStatus(e.target.value)}
-              className="px-6 py-4 border border-gray-200 rounded-xl bg-white font-medium text-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              className="px-5 py-3 border border-gray-200 rounded-xl bg-white text-sm font-medium focus:outline-none focus:ring-2 focus:ring-indigo-400"
             >
               <option value="Tất cả">Tất cả trạng thái</option>
               <option value="Chờ tiếp nhận">Chờ tiếp nhận</option>
@@ -195,85 +198,46 @@ export default function RepairManager() {
           </div>
         </div>
 
-        {/* Bảng danh sách */}
-        <div className="bg-white rounded-2xl shadow-xl overflow-hidden">
+        {/* Bảng danh sách – GỌN GÀNG & VỪA MẮT */}
+        <div className="bg-white rounded-2xl shadow overflow-hidden">
           <div className="overflow-x-auto">
-            <table className="w-full">
+            <table className="w-full text-sm">
               <thead className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white">
                 <tr>
-                  <th className="px-6 py-5 text-left font-semibold">Mã Phiếu</th>
-                  <th className="px-6 py-5 text-left font-semibold">Mã Lịch</th>
-                  <th className="px-6 py-5 text-left font-semibold">Nhân Viên</th>
-                  <th className="px-6 py-5 text-left font-semibold">Khách Hàng</th>
-                  <th className="px-6 py-5 text-center font-semibold">Ngày Lập</th>
-                  <th className="px-6 py-5 text-center font-semibold">Trạng Thái</th>
-                  <th className="px-6 py-5 text-center font-semibold">Thanh Toán</th>
-                  <th className="px-6 py-5 text-center font-semibold">Xem Chi Tiết</th>
-                  <th className="px-6 py-5 text-center font-semibold">Thao Tác</th>
+                  <th className="px-4 py-4 text-left font-semibold">Mã Phiếu</th>
+                  <th className="px-4 py-4 text-left font-semibold">Mã Lịch</th>
+                  <th className="px-4 py-4 text-left font-semibold">Nhân Viên</th>
+                  <th className="px-4 py-4 text-left font-semibold">Khách Hàng</th>
+                  <th className="px-4 py-4 text-left font-semibold">Biển Số</th>
+                  <th className="px-4 py-4 text-center font-semibold">Ngày Lập</th>
+                  <th className="px-4 py-4 text-center font-semibold">Trạng Thái</th>
+                  <th className="px-4 py-4 text-center font-semibold">Thanh Toán</th>
+                  <th className="px-4 py-4 text-center font-semibold">Chi Tiết</th>
+                  <th className="px-4 py-4 text-center font-semibold">Thao Tác</th>
                 </tr>
               </thead>
-
               <tbody className="divide-y divide-gray-200">
                 {loading ? (
-                  <tr>
-                    <td colSpan="9" className="text-center py-16 text-gray-500 text-lg">
-                      Đang tải dữ liệu...
-                    </td>
-                  </tr>
+                  <tr><td colSpan="10" className="text-center py-12 text-gray-500">Đang tải...</td></tr>
                 ) : filteredData.length === 0 ? (
-                  <tr>
-                    <td colSpan="9" className="text-center py-16 text-gray-400 text-xl font-medium">
-                      Không có phiếu sửa chữa nào
-                    </td>
-                  </tr>
+                  <tr><td colSpan="10" className="text-center py-12 text-gray-400">Không có phiếu nào</td></tr>
                 ) : (
                   filteredData.map((r) => (
-                    <tr key={r.maPhieu} className="hover:bg-indigo-50 transition">
-                      <td className="px-6 py-5 font-bold text-indigo-700 text-lg">{r.maPhieu}</td>
-
-                      <td className="px-6 py-5">
-                        <div className="flex items-center gap-2">
-                          <ClipboardList size={18} className="text-gray-500" />
-                          <span className="font-medium">
-                            {r.maLich || <span className="text-gray-400 italic">Chưa có</span>}
-                          </span>
-                        </div>
-                      </td>
-
-                      <td className="px-6 py-5">
-                        {r.maNV ? (
-                          <div className="flex items-center gap-3">
-                            <User size={20} className="text-indigo-600" />
-                            <div>
-                              <div className="font-semibold">{r.maNV}</div>
-                            </div>
-                          </div>
-                        ) : (
-                          <span className="text-gray-400 italic">Chưa phân công</span>
-                        )}
-                      </td>
-
-                      <td className="px-6 py-5">
-                        <span className="font-medium">{r.khachHang?.hoTen || "N/A"}</span>
-                      </td>
-
-                      <td className="px-6 py-5 text-center">
-                        <div className="flex items-center justify-center gap-2">
-                          <CalendarDays size={20} className="text-purple-600" />
-                          <span className="font-medium">{r.ngayLap || "-"}</span>
-                        </div>
-                      </td>
-
-                      <td className="px-6 py-5 text-center">
+                    <tr key={r.maPhieu} className="hover:bg-indigo-50/50 transition">
+                      <td className="px-4 py-4 font-medium text-indigo-700">{r.maPhieu}</td>
+                      <td className="px-4 py-4 text-gray-700">{r.maLich || "Chưa có"}</td>
+                      <td className="px-4 py-4 text-gray-700">{r.maNV || "Chưa phân công"}</td>
+                      <td className="px-4 py-4 text-gray-800 font-medium">{r.khachHang?.hoTen || "N/A"}</td>
+                      <td className="px-4 py-4 font-mono font-bold text-purple-700">{r.xe?.bienSo || "Chưa có"}</td>
+                      <td className="px-4 py-4 text-center text-gray-700">{r.ngayLap || "-"}</td>
+                      <td className="px-4 py-4 text-center">
                         <select
                           value={r.trangThai}
                           onChange={(e) => updateStatus(r.maPhieu, e.target.value)}
-                          className={`px-5 py-2 rounded-full text-xs font-bold cursor-pointer transition ${
-                            r.trangThai === "Hoàn thành"
-                              ? "bg-green-100 text-green-800"
-                              : r.trangThai === "Đang sửa"
-                              ? "bg-yellow-100 text-yellow-800"
-                              : "bg-orange-100 text-orange-800"
+                          className={`px-4 py-1.5 rounded-full text-xs font-bold cursor-pointer transition ${
+                            r.trangThai === "Hoàn thành" ? "bg-green-100 text-green-800" :
+                            r.trangThai === "Đang sửa" ? "bg-yellow-100 text-yellow-800" :
+                            "bg-orange-100 text-orange-800"
                           }`}
                         >
                           <option value="Chờ tiếp nhận">Chờ tiếp nhận</option>
@@ -281,39 +245,27 @@ export default function RepairManager() {
                           <option value="Hoàn thành">Hoàn thành</option>
                         </select>
                       </td>
-
-                      {/* Cột trạng thái thanh toán */}
-                      <td className="px-6 py-5 text-center">
-                        <span className={`px-4 py-2 rounded-full text-xs font-bold ${getPaymentStatusColor(r.thanhToanStatus)}`}>
+                      <td className="px-4 py-4 text-center">
+                        <span className={`inline-block px-4 py-1.5 rounded-full text-xs font-bold whitespace-nowrap ${getPaymentStatusColor(r.thanhToanStatus)}`}>
                           {r.thanhToanStatus || "Chưa thanh toán"}
                         </span>
                       </td>
-
-                      <td className="px-6 py-5 text-center">
+                      <td className="px-4 py-4 text-center">
                         <Link
-                          to={`/admin/repairParts/${r.maPhieu}`}
-                          className="inline-flex items-center gap-2 text-indigo-600 hover:text-indigo-800 font-bold underline"
+                          to={`/customer/repairParts/${r.maPhieu}`}
+                          className="inline-flex items-center gap-1 text-indigo-600 hover:text-indigo-800 font-medium text-xs underline"
                         >
-                          <CreditCard size={18} />
-                          Xem chi tiết
+                          <ClipboardList size={16} />
+                          Chi tiết
                         </Link>
                       </td>
-
-                      <td className="px-6 py-5 text-center">
-                        <div className="flex justify-center gap-5">
-                          <button
-                            onClick={() => openForm(r)}
-                            className="text-indigo-600 hover:text-indigo-800 transition"
-                            title="Sửa"
-                          >
-                            <Edit3 size={21} />
+                      <td className="px-4 py-4 text-center">
+                        <div className="flex justify-center gap-3">
+                          <button onClick={() => openForm(r)} className="text-indigo-600 hover:text-indigo-800 transition" title="Sửa">
+                            <Edit3 size={18} />
                           </button>
-                          <button
-                            onClick={() => handleDelete(r.maPhieu)}
-                            className="text-red-600 hover:text-red-800 transition"
-                            title="Xóa"
-                          >
-                            <Trash2 size={21} />
+                          <button onClick={() => handleDelete(r.maPhieu)} className="text-red-600 hover:text-red-800 transition" title="Xóa">
+                            <Trash2 size={18} />
                           </button>
                         </div>
                       </td>
@@ -326,81 +278,74 @@ export default function RepairManager() {
 
           {/* Phân trang */}
           {data.totalPages > 1 && (
-            <div className="flex justify-center items-center gap-3 py-6 bg-gray-50">
-              <button
-                onClick={() => setPage((p) => Math.max(0, p - 1))}
-                disabled={page === 0}
-                className="p-3 rounded-lg bg-white shadow hover:bg-gray-100 disabled:opacity-50"
-              >
-                <ChevronLeft size={20} />
+            <div className="flex justify-center items-center gap-2 py-5 bg-gray-50">
+              <button onClick={() => setPage((p) => Math.max(0, p - 1))} disabled={page === 0} className="p-2 rounded-md bg-white shadow hover:bg-gray-100 disabled:opacity-50">
+                <ChevronLeft size={18} />
               </button>
-
-              <div className="flex gap-2">
+              <div className="flex gap-1">
                 {[...Array(data.totalPages)].map((_, i) => (
-                  <button
-                    key={i}
-                    onClick={() => setPage(i)}
-                    className={`w-10 h-10 rounded-lg font-semibold transition ${
-                      page === i
-                        ? "bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-lg"
-                        : "bg-white hover:bg-gray-100 text-gray-700"
-                    }`}
-                  >
+                  <button key={i} onClick={() => setPage(i)} className={`w-8 h-8 rounded-md font-medium transition text-sm ${page === i ? "bg-indigo-600 text-white" : "bg-white hover:bg-gray-100 text-gray-700"}`}>
                     {i + 1}
                   </button>
                 ))}
               </div>
-
-              <button
-                onClick={() => setPage((p) => Math.min(data.totalPages - 1, p + 1))}
-                disabled={page === data.totalPages - 1}
-                className="p-3 rounded-lg bg-white shadow hover:bg-gray-100 disabled:opacity-50"
-              >
-                <ChevronRight size={20} />
+              <button onClick={() => setPage((p) => Math.min(data.totalPages - 1, p + 1))} disabled={page === data.totalPages - 1} className="p-2 rounded-md bg-white shadow hover:bg-gray-100 disabled:opacity-50">
+                <ChevronRight size={18} />
               </button>
             </div>
           )}
         </div>
 
-        {/* Form thêm/sửa phiếu */}
+        {/* Form thêm/sửa */}
         {showForm && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-            <div className="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-2xl">
-              <h2 className="text-3xl font-bold text-center mb-8 bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
-                {editingItem ? "SỬA PHIẾU SỬA CHỮA" : "THÊM PHIẾU SỬA CHỮA MỚI"}
+          <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4">
+            <div className="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-xl">
+              <h2 className="text-3xl font-bold text-center mb-8 text-indigo-600">
+                {editingItem ? "SỬA PHIẾU SỬA CHỮA" : "THÊM PHIẾU MỚI"}
               </h2>
 
               {editingItem && (
                 <div className="text-center mb-6">
-                  <span className="inline-block px-6 py-3 bg-indigo-100 text-indigo-800 rounded-xl font-bold text-lg">
+                  <span className="inline-block px-6 py-2 bg-indigo-100 text-indigo-800 rounded-full font-bold">
                     Mã phiếu: {editingItem.maPhieu}
                   </span>
                 </div>
               )}
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                 <input
-                  placeholder="Mã lịch hẹn (VD: LH001)"
+                  placeholder="Mã lịch hẹn (VD: LH001) *"
                   value={formData.maLich}
                   onChange={(e) => setFormData({ ...formData, maLich: e.target.value })}
-                  className="px-5 py-4 border-2 border-gray-300 rounded-xl focus:ring-4 focus:ring-indigo-300 outline-none"
+                  className="px-5 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-400 outline-none text-sm"
+                  required
                 />
                 <input
-                  placeholder="Mã nhân viên (VD: NV001)"
+                  placeholder="Biển số xe (VD: 59A1-12345) *"
+                  value={formData.bienSo}
+                  onChange={(e) => setFormData({ ...formData, bienSo: e.target.value })}
+                  className="px-5 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-400 outline-none text-sm font-mono"
+                  required
+                />
+                <input
+                  placeholder="Mã nhân viên (tùy chọn)"
                   value={formData.maNV}
                   onChange={(e) => setFormData({ ...formData, maNV: e.target.value })}
-                  className="px-5 py-4 border-2 border-gray-300 rounded-xl focus:ring-4 focus:ring-purple-300 outline-none"
+                  className="px-5 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-400 outline-none text-sm"
                 />
                 <input
                   type="date"
                   value={formData.ngayLap}
                   onChange={(e) => setFormData({ ...formData, ngayLap: e.target.value })}
-                  className="px-5 py-4 border-2 border-gray-300 rounded-xl focus:ring-4 focus:ring-indigo-300"
+                  className="px-5 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-400 outline-none text-sm"
                 />
+              </div>
+
+              <div className="mt-5">
                 <select
                   value={formData.trangThai}
                   onChange={(e) => setFormData({ ...formData, trangThai: e.target.value })}
-                  className="px-5 py-4 border-2 border-gray-300 rounded-xl focus:ring-4 focus:ring-purple-300 font-medium"
+                  className="w-full px-5 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-400 outline-none text-sm font-medium"
                 >
                   <option value="Chờ tiếp nhận">Chờ tiếp nhận</option>
                   <option value="Đang sửa">Đang sửa</option>
@@ -412,20 +357,20 @@ export default function RepairManager() {
                 placeholder="Ghi chú (tùy chọn)"
                 value={formData.ghiChu}
                 onChange={(e) => setFormData({ ...formData, ghiChu: e.target.value })}
-                rows="3"
-                className="w-full mt-6 px-5 py-4 border-2 border-gray-300 rounded-xl focus:ring-4 focus:ring-indigo-300 outline-none resize-none"
+                rows="2"
+                className="w-full mt-5 px-5 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-400 outline-none text-sm resize-none"
               />
 
-              <div className="flex justify-center gap-6 mt-8">
+              <div className="flex justify-center gap-5 mt-8">
                 <button
                   onClick={() => setShowForm(false)}
-                  className="px-10 py-4 border-2 border-gray-300 rounded-xl font-bold hover:bg-gray-50 transition"
+                  className="px-10 py-3 border border-gray-300 rounded-xl font-medium hover:bg-gray-50 transition text-sm"
                 >
                   Hủy bỏ
                 </button>
                 <button
                   onClick={handleSave}
-                  className="px-12 py-4 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-xl font-bold shadow-lg hover:shadow-xl transition"
+                  className="px-12 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-xl font-medium shadow-md hover:shadow-lg transition text-sm"
                 >
                   {editingItem ? "CẬP NHẬT" : "THÊM MỚI"}
                 </button>

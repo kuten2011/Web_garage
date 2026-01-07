@@ -20,13 +20,11 @@ public class Booking {
     @JoinColumn(name = "maKH")
     private Customer khachHang;
 
-    @ManyToOne
-    @JoinColumn(name = "bienSo")
-    private Vehicle xe;
-
     private LocalDate ngayHen;
     private LocalTime gioHen;
     private String trangThai;
+
+    private String ghiChu;
 
     @Transient
     private String maKH;
@@ -39,6 +37,5 @@ public class Booking {
     @PreUpdate
     private void updateTransientFields() {
         this.maKH = khachHang != null ? khachHang.getMaKH() : null;
-        this.bienSo = xe != null ? xe.getBienSo() : null;
     }
 }

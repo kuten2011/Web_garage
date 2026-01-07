@@ -12,17 +12,17 @@ ON CONFLICT ("maChiNhanh") DO NOTHING;
 -- Khách hàng
 INSERT INTO "KhachHang" ("maKH", "hoTen", "sdt", "email", "diaChi", "matKhau", "role")
 VALUES
-('KH01', 'Nguyễn Văn A', '0905123456', 'a.nguyen@gmail.com', 'Q1, TP.HCM', '$2a$10$examplehash1234567890abcdef', 'ROLE_CUSTOMER'),
-('KH02', 'Trần Thị B', '0906234567', 'b.tran@gmail.com', 'Q3, TP.HCM', '$2a$10$examplehash1234567890abcdef', 'ROLE_CUSTOMER'),
-('KH03', 'Lê Hoàng C', '0907345678', 'c.le@gmail.com', 'Q7, TP.HCM', '$2a$10$examplehash1234567890abcdef', 'ROLE_CUSTOMER')
+('KH01', 'Nguyễn Văn A', '0905123456', 'a.nguyen@gmail.com', 'Q1, TP.HCM', '$2a$10$TUvI0e9ePIUtPKGob.JfN.HyCxca9IyIWncC.GWfhcw1Ls2/LCh0.', 'ROLE_CUSTOMER'),
+('KH02', 'Trần Thị B', '0906234567', 'b.tran@gmail.com', 'Q3, TP.HCM', '$2a$10$TUvI0e9ePIUtPKGob.JfN.HyCxca9IyIWncC.GWfhcw1Ls2/LCh0.', 'ROLE_CUSTOMER'),
+('KH03', 'Lê Hoàng C', '0907345678', 'c.le@gmail.com', 'Q7, TP.HCM', '$2a$10$TUvI0e9ePIUtPKGob.JfN.HyCxca9IyIWncC.GWfhcw1Ls2/LCh0.', 'ROLE_CUSTOMER')
 ON CONFLICT ("maKH") DO NOTHING;
 
 -- Nhân viên
 INSERT INTO "NhanVien" ("maNV", "hoTen", "vaiTro", "sdt", "email", "matKhau", "maChiNhanh", "role")
 VALUES
-('NV01', 'Phạm Văn D', 'Kỹ thuật viên', '0908123123', 'd.pham@garage.vn', '$2a$10$examplehash1234567890abcdef', 'CN01', 'ROLE_EMPLOYEE'),
-('NV02', 'Võ Thị E', 'Lễ tân', '0908456789', 'e.vo@garage.vn', '$2a$10$examplehash1234567890abcdef', 'CN01', 'ROLE_EMPLOYEE'),
-('NV03', 'Ngô Minh F', 'Quản lý', '0909678456', 'f.ngo@garage.vn', '$2a$10$examplehash1234567890abcdef', 'CN02', 'ROLE_MANAGER')
+('NV01', 'Phạm Văn D', 'Kỹ thuật viên', '0908123123', 'admin@gara.com', '$2a$10$TUvI0e9ePIUtPKGob.JfN.HyCxca9IyIWncC.GWfhcw1Ls2/LCh0.', 'CN01', 'ROLE_ADMIN'),
+('NV02', 'Võ Thị E', 'Lễ tân', '0908456789', 'e.vo@garage.vn', '$2a$10$TUvI0e9ePIUtPKGob.JfN.HyCxca9IyIWncC.GWfhcw1Ls2/LCh0.', 'CN01', 'ROLE_EMPLOYEE'),
+('NV03', 'Ngô Minh F', 'Quản lý', '0909678456', 'f.ngo@garage.vn', '$2a$10$TUvI0e9ePIUtPKGob.JfN.HyCxca9IyIWncC.GWfhcw1Ls2/LCh0.', 'CN02', 'ROLE_MANAGER')
 ON CONFLICT ("maNV") DO NOTHING;
 
 -- Xe
@@ -34,11 +34,11 @@ VALUES
 ON CONFLICT ("bienSo") DO NOTHING;
 
 -- Lịch hẹn
-INSERT INTO "LichHen" ("maLich", "maKH", "bienSo", "ngayHen", "gioHen", "trangThai")
+INSERT INTO "LichHen" ("maLich", "maKH", "ngayHen", "gioHen", "trangThai", "ghiChu")
 VALUES
-('LH01', 'KH01', '59A-12345', '2025-10-20', '09:00:00', 'Chờ xác nhận'),
-('LH02', 'KH02', '51B-67890', '2025-10-21', '10:30:00', 'Đã xác nhận'),
-('LH03', 'KH03', '50C-11223', '2025-10-22', '08:00:00', 'Đã hoàn thành')
+('LH01', 'KH01', '2025-10-20', '09:00:00', 'Chờ xác nhận', 'Xe không nổ máy'),
+('LH02', 'KH02', '2025-10-21', '10:30:00', 'Đã xác nhận', 'Đề xe không nổ'),
+('LH03', 'KH03', '2025-10-22', '08:00:00', 'Đã hoàn thành', 'Khói quá nhiều')
 ON CONFLICT ("maLich") DO NOTHING;
 
 -- Dịch vụ (giữ nguyên như bạn có)
@@ -115,10 +115,10 @@ VALUES
 ('PT02', 'Lọc dầu', 250000, 30, 'https://res.cloudinary.com/web-garage/image/upload/loc-dau_n2pyj2.jpg')
 ON CONFLICT ("maPT") DO NOTHING;
 
--- PHIẾU SỬA CHỮA (phải INSERT TRƯỚC chi tiết)
-INSERT INTO "PhieuSuaChua" ("maPhieu", "maLich", "maNV", "ngayLap", "ghiChu", "trangThai")
+-- PHIẾU SỬA CHỮA (ĐÃ THÊM bienSo VÀO INSERT)
+INSERT INTO "PhieuSuaChua" ("maPhieu", "maLich", "maNV", "ngayLap", "ghiChu", "trangThai", "bienSo")
 VALUES
-('PSC01', 'LH03', 'NV01', '2025-10-22', 'Bảo dưỡng định kỳ và thay phanh', 'Hoàn thành')
+('PSC01', 'LH03', 'NV01', '2025-10-22', 'Bảo dưỡng định kỳ và thay phanh', 'Hoàn thành', '50C-11223')
 ON CONFLICT ("maPhieu") DO NOTHING;
 
 -- CHI TIẾT SỬA CHỮA - DỊCH VỤ (bảng mới, dùng maPhieu)
@@ -137,9 +137,11 @@ VALUES
 ON CONFLICT ("maPhieu", "maPT") DO NOTHING;
 
 -- Phản hồi
-INSERT INTO "PhanHoi" ("maPhanHoi", "maKH", "noiDung", "ngayGui", "trangThai", "maNVXL", "phanHoiQL")
+INSERT INTO "PhanHoi" ("maPhanHoi", "maPSC", "noiDung", "soSao", "ngayGui", "trangThai", "phanHoiQL")
 VALUES
-('PH01', 'KH01', 'Thái độ phục vụ tốt.', '2025-10-23 09:30:00', 'Đã phản hồi', 'NV03', 'Cảm ơn góp ý của bạn!')
+('PH01', 'PSC01', 'Dịch vụ tốt, nhân viên nhiệt tình, xe chạy êm hơn trước!', 5, '2025-10-23 10:30:00', 'Đã phản hồi', 'Cảm ơn quý khách! Rất vui được phục vụ.'),
+('PH02', 'PSC01', 'Thay dầu hơi lâu, nhưng chất lượng ổn.', 4, '2025-10-23 14:15:00', 'Đã phản hồi', 'Xin lỗi vì sự bất tiện, chúng tôi sẽ cải thiện thời gian phục vụ.'),
+('PH03', 'PSC01', 'Giá hơi cao so với mặt bằng.', 3, '2025-10-24 09:00:00', 'Chưa phản hồi', NULL)
 ON CONFLICT ("maPhanHoi") DO NOTHING;
 
 -- Báo cáo

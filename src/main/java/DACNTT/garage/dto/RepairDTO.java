@@ -1,4 +1,3 @@
-// src/main/java/DACNTT/garage/dto/RepairDTO.java
 package DACNTT.garage.dto;
 
 import lombok.AllArgsConstructor;
@@ -7,6 +6,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @NoArgsConstructor
 @AllArgsConstructor
@@ -19,6 +19,7 @@ public class RepairDTO {
     private LocalDate ngayLap;
     private String ghiChu;
     private String trangThai;
+    private String bienSo;
 
     private String thanhToanStatus;
 
@@ -26,4 +27,12 @@ public class RepairDTO {
 
     private CustomerDTO khachHang;
     private VehicleDTO xe;
+
+    private boolean daDanhGia = false;
+    private Integer soSao;
+    private String noiDungPhanHoi;
+    private LocalDateTime ngayDanhGia;
+    private String phanHoiQL;
+    public boolean isDaDanhGia() { return daDanhGia; }
+    public void setDaDanhGia(boolean daDanhGia) { this.daDanhGia = daDanhGia; }
 }

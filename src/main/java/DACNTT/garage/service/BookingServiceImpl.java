@@ -51,14 +51,23 @@ public class BookingServiceImpl implements BookingService {
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy khách hàng: " + maKH));
         booking.setKhachHang(customer);
 
-        String bienSo = booking.getBienSo() != null ? booking.getBienSo()
-                : (booking.getXe() != null ? booking.getXe().getBienSo() : null);
-        if (bienSo == null || bienSo.isBlank()) {
-            throw new RuntimeException("Biển số xe không được để trống!");
+        return bookingRepository.save(booking);
+    }
+
+    @Override
+    public Booking addBookingCustomer(Booking booking) {
+        if (booking.getMaLich() == null || booking.getMaLich().trim().isEmpty()) {
+            booking.setMaLich(generateNextMaLich());
         }
-        Vehicle xe = vehicleRepository.findById(bienSo)
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy xe biển số: " + bienSo));
-        booking.setXe(xe);
+
+        String maKH = booking.getMaKH() != null ? booking.getMaKH()
+                : (booking.getKhachHang() != null ? booking.getKhachHang().getMaKH() : null);
+        if (maKH == null || maKH.isBlank()) {
+            throw new RuntimeException("Mã khách hàng không được để trống!");
+        }
+        Customer customer = customerRepository.findByEmail(maKH)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy khách hàng: " + maKH));
+        booking.setKhachHang(customer);
 
         return bookingRepository.save(booking);
     }
@@ -90,14 +99,12 @@ public class BookingServiceImpl implements BookingService {
 
         Customer customer = customerRepository.findById(dto.getMaKH())
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy khách hàng: " + dto.getMaKH()));
-        Vehicle vehicle = vehicleRepository.findById(dto.getBienSo())
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy xe: " + dto.getBienSo()));
 
         booking.setKhachHang(customer);
-        booking.setXe(vehicle);
         booking.setNgayHen(dto.getNgayHen());
         booking.setGioHen(dto.getGioHen());
         booking.setTrangThai(dto.getTrangThai());
+        booking.setGhiChu(dto.getGhiChu());
 
         return bookingRepository.save(booking);
     }

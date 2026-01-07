@@ -5,11 +5,18 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 
+import java.util.Optional;
+
 public interface FeedbackRepository extends JpaRepository<Feedback, String> {
 
-    Page<Feedback> findByTrangThai(String trangThai, Pageable pageable);
+    Page<Feedback> findAll(Pageable pageable);
 
-    // SỬA ĐÚNG – DÙNG KHACHHANG.MAKH VÀ KHACHHANG.HOTEN
-    Page<Feedback> findByNoiDungContainingIgnoreCaseOrKhachHang_MaKHContainingIgnoreCaseOrKhachHang_HoTenContainingIgnoreCase(
-            String noiDung, String maKH, String hoTen, Pageable pageable);
+    Page<Feedback> findByNoiDungContainingIgnoreCaseOrPhieuSuaChua_Xe_BienSoContainingIgnoreCase(
+            String noiDung, String bienSo, Pageable pageable);
+    Page<Feedback> findByNoiDungContainingIgnoreCaseOrPhieuSuaChua_Xe_BienSoContainingIgnoreCaseAndTrangThai(
+            String noiDung, String bienSo, String trangThai, Pageable pageable);
+
+    Page<Feedback> findByTrangThai(String trangThai, Pageable pageable);
+    boolean existsByPhieuSuaChua_MaPhieu(String maPhieu);
+    Optional<Feedback> findByPhieuSuaChua_MaPhieu(String maPhieu);
 }

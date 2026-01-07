@@ -2,7 +2,7 @@ import React, { useState, useEffect, useMemo } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import axiosInstance from "../../api/axiosInstance"; 
+import axiosInstance from "../../api/axiosInstance";
 import {
   Plus,
   Search,
@@ -21,12 +21,10 @@ const PAGE_SIZE = 10;
 
 const addSchema = z.object({
   maKH: z.string().min(1, "Vui lòng nhập mã khách hàng"),
-  bienSo: z
-    .string()
-    .regex(/^\d{2}[A-Z]{1,2}-\d{5}$/, "Biển số không hợp lệ. VD: 59A-12345"),
   ngayHen: z.string().min(1, "Chọn ngày hẹn"),
   gioHen: z.string().min(1, "Chọn giờ hẹn"),
   trangThai: z.enum(["Chờ xác nhận", "Đã xác nhận", "Hoàn thành"]),
+  ghiChu: z.string().nullable().optional(),
 });
 
 const editSchema = addSchema.extend({ maLich: z.string().min(1) });
@@ -42,6 +40,8 @@ export default function BookingManager() {
   const [filterStatus, setFilterStatus] = useState("Tất cả");
   const [dateFrom, setDateFrom] = useState("");
   const [dateTo, setDateTo] = useState("");
+  const [showNote, setShowNote] = useState(false);
+  const [selectedNote, setSelectedNote] = useState("");
 
   const {
     register,
@@ -67,7 +67,9 @@ export default function BookingManager() {
       if (dateFrom) params.append("dateFrom", dateFrom);
       if (dateTo) params.append("dateTo", dateTo);
 
-      const res = await axiosInstance.get(`${API_BASE}/bookings?${params.toString()}`);
+      const res = await axiosInstance.get(
+        `${API_BASE}/bookings?${params.toString()}`
+      );
       setData(res.data);
     } catch (err) {
       alert("Lỗi tải dữ liệu: " + (err.response?.data?.message || err.message));
@@ -112,10 +114,10 @@ export default function BookingManager() {
     if (item) {
       setValue("maLich", item.maLich);
       setValue("maKH", item.maKH || "");
-      setValue("bienSo", item.bienSo || "");
       setValue("ngayHen", item.ngayHen);
       setValue("gioHen", item.gioHen);
       setValue("trangThai", item.trangThai);
+      setValue("ghiChu", item.ghiChu || "");
       setIsEditing(true);
     } else {
       reset();
@@ -127,7 +129,10 @@ export default function BookingManager() {
   const onSubmit = async (formData) => {
     try {
       if (isEditing) {
-        await axiosInstance.put(`${API_BASE}/bookings/${formData.maLich}`, formData);
+        await axiosInstance.put(
+          `${API_BASE}/bookings/${formData.maLich}`,
+          formData
+        );
         alert("Cập nhật thành công!");
       } else {
         const { maLich, ...payload } = formData;
@@ -238,13 +243,15 @@ export default function BookingManager() {
                   <th className="px-6 py-5 text-left font-semibold">
                     Khách Hàng
                   </th>
-                  <th className="px-6 py-5 text-left font-semibold">Biển Số</th>
                   <th className="px-6 py-5 text-center font-semibold">
                     Ngày Hẹn
                   </th>
                   <th className="px-6 py-5 text-center font-semibold">Giờ</th>
                   <th className="px-6 py-5 text-center font-semibold">
                     Trạng Thái
+                  </th>
+                  <th className="px-6 py-5 text-center font-semibold">
+                    Ghi Chú
                   </th>
                   <th className="px-6 py-5 text-center font-semibold">
                     Thao Tác
@@ -255,7 +262,7 @@ export default function BookingManager() {
                 {loading ? (
                   <tr>
                     <td
-                      colSpan="7"
+                      colSpan="8"
                       className="text-center py-16 text-gray-500 text-lg"
                     >
                       Đang tải dữ liệu...
@@ -264,7 +271,7 @@ export default function BookingManager() {
                 ) : data.content.length === 0 ? (
                   <tr>
                     <td
-                      colSpan="7"
+                      colSpan="8"
                       className="text-center py-16 text-gray-400 text-xl font-medium"
                     >
                       Không có lịch hẹn nào
@@ -295,14 +302,6 @@ export default function BookingManager() {
                         ) : (
                           <span className="text-gray-400 italic">
                             Chưa có khách
-                          </span>
-                        )}
-                      </td>
-
-                      <td className="px-6 py-5 font-mono font-bold text-purple-700">
-                        {item.bienSo || (
-                          <span className="text-gray-400 italic">
-                            Chưa có xe
                           </span>
                         )}
                       </td>
@@ -339,6 +338,23 @@ export default function BookingManager() {
                           <option value="Đã xác nhận">Đã xác nhận</option>
                           <option value="Hoàn thành">Hoàn thành</option>
                         </select>
+                      </td>
+
+                      <td className="px-6 py-5 text-center">
+                        {item.ghiChu ? (
+                          <button
+                            onClick={() => {
+                              setSelectedNote(item.ghiChu);
+                              setShowNote(true);
+                            }}
+                            className="max-w-[200px] truncate text-indigo-600 underline hover:text-indigo-800 cursor-pointer"
+                            title="Xem ghi chú"
+                          >
+                            {item.ghiChu}
+                          </button>
+                        ) : (
+                          <span className="text-gray-400 italic">—</span>
+                        )}
                       </td>
 
                       <td className="px-6 py-5 text-center">
@@ -434,19 +450,6 @@ export default function BookingManager() {
                       </p>
                     )}
                   </div>
-
-                  <div>
-                    <input
-                      {...register("bienSo")}
-                      placeholder="Biển số xe"
-                      className="w-full px-5 py-4 border-2 border-gray-300 rounded-xl focus:ring-4 focus:ring-purple-300 font-mono outline-none"
-                    />
-                    {errors.bienSo && (
-                      <p className="text-red-500 text-sm mt-1">
-                        {errors.bienSo.message}
-                      </p>
-                    )}
-                  </div>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -470,6 +473,18 @@ export default function BookingManager() {
                   <option value="Đã xác nhận">Đã xác nhận</option>
                   <option value="Hoàn thành">Hoàn thành</option>
                 </select>
+
+                <textarea
+                  {...register("ghiChu")}
+                  placeholder="Ghi chú cho lịch hẹn (VD: Khách yêu cầu gọi trước khi đến, kiểm tra phanh...)"
+                  rows={3}
+                  className="w-full px-5 py-4 border-2 border-gray-300 rounded-xl focus:ring-4 focus:ring-indigo-300 resize-none"
+                />
+                {errors.ghiChu && (
+                  <p className="text-red-500 text-sm mt-1">
+                    {errors.ghiChu.message}
+                  </p>
+                )}
 
                 <div className="flex justify-center gap-6 pt-6">
                   <button
@@ -496,6 +511,29 @@ export default function BookingManager() {
           </div>
         )}
       </div>
+
+      {showNote && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl shadow-2xl p-6 w-full max-w-lg relative">
+            <h3 className="text-xl font-bold text-indigo-700 mb-4">
+              Ghi chú lịch hẹn
+            </h3>
+
+            <div className="max-h-[300px] overflow-y-auto whitespace-pre-wrap text-gray-700 leading-relaxed border border-gray-200 p-4 rounded-lg bg-gray-50">
+              {selectedNote}
+            </div>
+
+            <div className="text-right mt-6">
+              <button
+                onClick={() => setShowNote(false)}
+                className="px-6 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700"
+              >
+                Đóng
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

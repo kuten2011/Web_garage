@@ -16,7 +16,7 @@ import {
   CheckCircle,
 } from "lucide-react";
 
-const API_BASE = "http://localhost:8080/admin";
+const API_BASE = "http://localhost:8080/customer";
 const REPAIR_API = `${API_BASE}/repairs`;
 const REPAIR_PART_API = `${API_BASE}/repair-parts/phieu`;
 const REPAIR_SERVICE_API = `${API_BASE}/repair-services/phieu`;
@@ -29,18 +29,22 @@ export default function RepairDetail() {
   const [loading, setLoading] = useState(true);
   const [totalAmount, setTotalAmount] = useState(0);
 
-  // Modal thêm phụ tùng
+  // Modal thêm phụ tùng/dịch vụ (chỉ admin)
   const [showAddPart, setShowAddPart] = useState(false);
   const [newPart, setNewPart] = useState({ maPT: "", soLuong: 1 });
-
-  // Modal thêm dịch vụ
   const [showAddService, setShowAddService] = useState(false);
   const [newService, setNewService] = useState({ maDV: "", soLuong: 1 });
 
   // Thanh toán
   const [showPaymentModal, setShowPaymentModal] = useState(false);
-  const [paymentMethod, setPaymentMethod] = useState(null); // 'cash' | 'transfer'
   const [qrCode, setQrCode] = useState(null);
+
+  // Kiểm tra role từ localStorage
+  const userData = JSON.parse(localStorage.getItem("user") || "{}");
+  const authorities = userData.authorities || [];
+  const roles = authorities.map(auth => typeof auth === "string" ? auth : auth.authority);
+  const isStaff = roles.some(role => role.includes("EMPLOYEE") || role.includes("MANAGER") || role.includes("ADMIN"));
+  const isCustomer = !isStaff && roles.includes("ROLE_CUSTOMER");
 
   const fetchData = async () => {
     try {
@@ -56,8 +60,8 @@ export default function RepairDetail() {
       setServices(servicesRes.data || []);
 
       // Tính tổng tiền
-      const totalParts = (partsRes.data || []).reduce((sum, item) => sum + (item.thanhTien || 0), 0);
-      const totalServices = (servicesRes.data || []).reduce((sum, item) => sum + (item.thanhTien || 0), 0);
+      const totalParts = (partsRes.data || []).reduce((sum, p) => sum + (p.thanhTien || 0), 0);
+      const totalServices = (servicesRes.data || []).reduce((sum, s) => sum + (s.thanhTien || 0), 0);
       setTotalAmount(totalParts + totalServices);
     } catch (err) {
       console.error("Lỗi tải dữ liệu:", err);
@@ -71,8 +75,9 @@ export default function RepairDetail() {
     fetchData();
   }, [maPhieu]);
 
-  // Thêm phụ tùng
+  // === CHỈ ADMIN MỚI ĐƯỢC THÊM/XÓA ===
   const handleAddPart = async () => {
+    if (!isStaff) return;
     if (!newPart.maPT.trim()) return alert("Vui lòng nhập mã phụ tùng!");
     try {
       await axiosInstance.post(`${REPAIR_PART_API}/${maPhieu}`, newPart);
@@ -85,8 +90,8 @@ export default function RepairDetail() {
     }
   };
 
-  // Xóa phụ tùng
   const handleRemovePart = async (maPT) => {
+    if (!isStaff) return;
     if (!window.confirm("Xóa phụ tùng này khỏi phiếu?")) return;
     try {
       await axiosInstance.delete(`${REPAIR_PART_API}/${maPhieu}/phutung/${maPT}`);
@@ -96,8 +101,8 @@ export default function RepairDetail() {
     }
   };
 
-  // Thêm dịch vụ
   const handleAddService = async () => {
+    if (!isStaff) return;
     if (!newService.maDV.trim()) return alert("Vui lòng nhập mã dịch vụ!");
     try {
       await axiosInstance.post(`${REPAIR_SERVICE_API}/${maPhieu}`, newService);
@@ -110,8 +115,8 @@ export default function RepairDetail() {
     }
   };
 
-  // Xóa dịch vụ
   const handleRemoveService = async (maDV) => {
+    if (!isStaff) return;
     if (!window.confirm("Xóa dịch vụ này khỏi phiếu?")) return;
     try {
       await axiosInstance.delete(`${REPAIR_SERVICE_API}/${maPhieu}/dichvu/${maDV}`);
@@ -121,8 +126,9 @@ export default function RepairDetail() {
     }
   };
 
-  // Thanh toán tiền mặt
+  // Thanh toán tiền mặt (chỉ admin)
   const handlePayCash = async () => {
+    if (!isStaff) return;
     try {
       await axiosInstance.post(`${API_BASE}/repairs/${maPhieu}/pay-cash`);
       alert("Thanh toán tiền mặt thành công!");
@@ -133,60 +139,41 @@ export default function RepairDetail() {
     }
   };
 
-  // Lấy QR chuyển khoản
+  // Lấy QR chuyển khoản (khách hàng + admin đều dùng được)
   const handleGetQR = async () => {
     try {
       const res = await axiosInstance.get(`${API_BASE}/repairs/${maPhieu}/qr`);
       setQrCode(res.data.qrCode);
-      setPaymentMethod("transfer");
     } catch (err) {
       alert("Lỗi tạo mã QR!");
     }
   };
 
-  // Xác nhận thủ công (admin)
+  // Xác nhận thủ công (chỉ admin)
   const handleConfirmPayment = async () => {
+    if (!isStaff) return;
     if (!window.confirm("Xác nhận đã nhận tiền chuyển khoản cho phiếu này?")) return;
     try {
       await axiosInstance.post(`${API_BASE}/repairs/${maPhieu}/confirm-payment`);
       alert("Xác nhận thành công!");
       fetchData();
       setQrCode(null);
-      setPaymentMethod(null);
     } catch (err) {
       alert("Lỗi xác nhận!");
     }
   };
 
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <div className="text-3xl text-gray-600">Đang tải chi tiết phiếu...</div>
-      </div>
-    );
-  }
-
-  if (!repair) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <div className="text-3xl text-red-600">Không tìm thấy phiếu sửa chữa!</div>
-      </div>
-    );
-  }
+  if (loading) return <div className="min-h-screen flex items-center justify-center text-3xl">Đang tải...</div>;
+  if (!repair) return <div className="min-h-screen flex items-center justify-center text-3xl text-red-600">Không tìm thấy phiếu!</div>;
 
   return (
     <div className="min-h-screen bg-gray-50 py-8 px-6">
       <div className="max-w-7xl mx-auto">
-        {/* Back button */}
-        <Link
-          to="/admin/repairs"
-          className="inline-flex items-center gap-3 text-indigo-600 hover:text-indigo-800 font-bold text-xl mb-8"
-        >
+        <Link to={isStaff ? "/admin/repairs" : "/my-repairs"} className="inline-flex items-center gap-3 text-indigo-600 hover:text-indigo-800 font-bold text-xl mb-8">
           <ArrowLeft size={28} />
-          Quay lại danh sách
+          Quay lại
         </Link>
 
-        {/* Header */}
         <div className="bg-white rounded-3xl shadow-2xl p-10 mb-10 text-center">
           <h1 className="text-5xl font-bold text-gray-800 mb-4">
             PHIẾU SỬA CHỮA: <span className="text-indigo-600">{maPhieu}</span>
@@ -198,43 +185,48 @@ export default function RepairDetail() {
 
         {/* Thông tin khách + xe + trạng thái */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">
-          <div className="bg-gradient-to-br from-blue-50 to-blue-100 p-8 rounded-3xl text-center">
+          <div className="bg-gradient-to-br from-blue-50 to-blue-100 p-8 rounded-3xl text-center shadow-xl">
             <User size={56} className="text-blue-600 mx-auto mb-4" />
-            <div className="text-2xl font-bold">{repair.khachHang?.hoTen || "Chưa có"}</div>
-            <div className="text-gray-600 mt-2">
-              {repair.khachHang?.sdt || "-"} | {repair.khachHang?.email || "-"}
+            <div className="text-2xl font-bold text-blue-800">{repair.khachHang?.hoTen || "Chưa có"}</div>
+            <div className="text-gray-700 mt-2 text-lg">
+              {repair.khachHang?.sdt || "-"}<br />
+              {repair.khachHang?.email || "-"}
             </div>
           </div>
 
-          <div className="bg-gradient-to-br from-purple-50 to-purple-100 p-8 rounded-3xl text-center">
+          <div className="bg-gradient-to-br from-purple-50 to-purple-100 p-8 rounded-3xl text-center shadow-xl">
             <Car size={56} className="text-purple-600 mx-auto mb-4" />
-            <div className="text-2xl font-bold">{repair.xe?.bienSo || "Chưa có"}</div>
-            <div className="text-gray-600 mt-2">
-              {repair.xe ? `${repair.xe.hangXe} - ${repair.xe.mauXe}` : "-"}
+            <div className="text-3xl font-bold text-purple-800">
+              {repair.xe?.bienSo || "Chưa có xe"}
+            </div>
+            <div className="text-gray-700 mt-3 text-lg">
+              {repair.xe ? `${repair.xe.hangXe || ''} ${repair.xe.mauXe || ''}`.trim() || "-" : "-"}
             </div>
           </div>
 
-          <div className="bg-gradient-to-br from-green-50 to-green-100 p-8 rounded-3xl text-center">
+          <div className="bg-gradient-to-br from-green-50 to-green-100 p-8 rounded-3xl text-center shadow-xl">
             <Wrench size={56} className="text-green-600 mx-auto mb-4" />
             <div className="text-3xl font-bold text-green-700">{repair.trangThai || "-"}</div>
-            <div className="text-gray-600 mt-2">Trạng thái phiếu</div>
+            <div className="text-gray-600 mt-2 text-lg">Trạng thái phiếu</div>
           </div>
         </div>
 
-        {/* Phụ tùng */}
+        {/* Phụ tùng – chỉ admin thấy nút thêm */}
         <div className="bg-white rounded-3xl shadow-2xl p-10 mb-12">
           <div className="flex justify-between items-center mb-8">
             <h2 className="text-4xl font-bold flex items-center gap-4">
               <Package size={40} className="text-purple-600" />
               Phụ tùng sử dụng
             </h2>
-            <button
-              onClick={() => setShowAddPart(true)}
-              className="bg-gradient-to-r from-purple-600 to-indigo-600 text-white px-8 py-4 rounded-2xl font-bold text-xl shadow-xl hover:shadow-2xl transition flex items-center gap-3"
-            >
-              <Plus size={28} />
-              Thêm phụ tùng
-            </button>
+            {isStaff && (
+              <button
+                onClick={() => setShowAddPart(true)}
+                className="bg-gradient-to-r from-purple-600 to-indigo-600 text-white px-8 py-4 rounded-2xl font-bold text-xl shadow-xl hover:shadow-2xl transition flex items-center gap-3"
+              >
+                <Plus size={28} />
+                Thêm phụ tùng
+              </button>
+            )}
           </div>
 
           {parts.length === 0 ? (
@@ -251,7 +243,7 @@ export default function RepairDetail() {
                     <th className="px-8 py-5 text-center">SL</th>
                     <th className="px-8 py-5 text-right">Đơn giá</th>
                     <th className="px-8 py-5 text-right">Thành tiền</th>
-                    <th className="px-8 py-5 text-center">Xóa</th>
+                    {isStaff && <th className="px-8 py-5 text-center">Xóa</th>}
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-200">
@@ -264,40 +256,37 @@ export default function RepairDetail() {
                       <td className="px-8 py-6 text-right font-bold text-purple-700 text-xl">
                         {(p.thanhTien || 0).toLocaleString()}đ
                       </td>
-                      <td className="px-8 py-6 text-center">
-                        <button onClick={() => handleRemovePart(p.maPT)} className="text-red-600 hover:text-red-800">
-                          <Trash2 size={24} />
-                        </button>
-                      </td>
+                      {isStaff && (
+                        <td className="px-8 py-6 text-center">
+                          <button onClick={() => handleRemovePart(p.maPT)} className="text-red-600 hover:text-red-800">
+                            <Trash2 size={24} />
+                          </button>
+                        </td>
+                      )}
                     </tr>
                   ))}
-                  <tr className="bg-purple-100 font-bold text-xl">
-                    <td colSpan="4" className="px-8 py-6 text-right">TỔNG PHỤ TÙNG:</td>
-                    <td className="px-8 py-6 text-right text-2xl text-purple-700">
-                      {parts.reduce((sum, p) => sum + (p.thanhTien || 0), 0).toLocaleString()}đ
-                    </td>
-                    <td></td>
-                  </tr>
                 </tbody>
               </table>
             </div>
           )}
         </div>
 
-        {/* Dịch vụ */}
+        {/* Dịch vụ – chỉ admin thấy nút thêm */}
         <div className="bg-white rounded-3xl shadow-2xl p-10 mb-12">
           <div className="flex justify-between items-center mb-8">
             <h2 className="text-4xl font-bold flex items-center gap-4">
               <Wrench size={40} className="text-indigo-600" />
               Dịch vụ thực hiện
             </h2>
-            <button
-              onClick={() => setShowAddService(true)}
-              className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white px-8 py-4 rounded-2xl font-bold text-xl shadow-xl hover:shadow-2xl transition flex items-center gap-3"
-            >
-              <Plus size={28} />
-              Thêm dịch vụ
-            </button>
+            {isStaff && (
+              <button
+                onClick={() => setShowAddService(true)}
+                className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white px-8 py-4 rounded-2xl font-bold text-xl shadow-xl hover:shadow-2xl transition flex items-center gap-3"
+              >
+                <Plus size={28} />
+                Thêm dịch vụ
+              </button>
+            )}
           </div>
 
           {services.length === 0 ? (
@@ -314,7 +303,7 @@ export default function RepairDetail() {
                     <th className="px-8 py-5 text-center">SL</th>
                     <th className="px-8 py-5 text-right">Giá</th>
                     <th className="px-8 py-5 text-right">Thành tiền</th>
-                    <th className="px-8 py-5 text-center">Xóa</th>
+                    {isStaff && <th className="px-8 py-5 text-center">Xóa</th>}
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-200">
@@ -327,20 +316,15 @@ export default function RepairDetail() {
                       <td className="px-8 py-6 text-right font-bold text-indigo-700 text-xl">
                         {(s.thanhTien || 0).toLocaleString()}đ
                       </td>
-                      <td className="px-8 py-6 text-center">
-                        <button onClick={() => handleRemoveService(s.maDV)} className="text-red-600 hover:text-red-800">
-                          <Trash2 size={24} />
-                        </button>
-                      </td>
+                      {isStaff && (
+                        <td className="px-8 py-6 text-center">
+                          <button onClick={() => handleRemoveService(s.maDV)} className="text-red-600 hover:text-red-800">
+                            <Trash2 size={24} />
+                          </button>
+                        </td>
+                      )}
                     </tr>
                   ))}
-                  <tr className="bg-indigo-100 font-bold text-xl">
-                    <td colSpan="4" className="px-8 py-6 text-right">TỔNG DỊCH VỤ:</td>
-                    <td className="px-8 py-6 text-right text-2xl text-indigo-700">
-                      {services.reduce((sum, s) => sum + (s.thanhTien || 0), 0).toLocaleString()}đ
-                    </td>
-                    <td></td>
-                  </tr>
                 </tbody>
               </table>
             </div>
@@ -348,25 +332,36 @@ export default function RepairDetail() {
         </div>
 
         {/* HÓA ĐƠN & THANH TOÁN */}
-        <div className="bg-white rounded-3xl shadow-2xl p-12 mb-12">
+        <div className="bg-white rounded-3xl shadow-2xl p-12">
           <h2 className="text-4xl font-bold text-center mb-10 flex items-center justify-center gap-4">
             <DollarSign size={48} className="text-green-600" />
             HÓA ĐƠN THANH TOÁN
           </h2>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
-            <div className="space-y-6 text-2xl">
-              <p>Tổng phụ tùng: <span className="font-bold">{parts.reduce((sum, p) => sum + (p.thanhTien || 0), 0).toLocaleString()} đ</span></p>
-              <p>Tổng dịch vụ: <span className="font-bold">{services.reduce((sum, s) => sum + (s.thanhTien || 0), 0).toLocaleString()} đ</span></p>
-              <p className="text-4xl font-bold text-green-600 border-t-4 border-green-600 pt-4">
-                TỔNG CỘNG: {totalAmount.toLocaleString()} đ
+            <div className="space-y-8 text-2xl">
+              <p className="flex justify-between">
+                <span>Tổng phụ tùng:</span>
+                <span className="font-bold text-purple-700">
+                  {parts.reduce((sum, p) => sum + (p.thanhTien || 0), 0).toLocaleString()} đ
+                </span>
+              </p>
+              <p className="flex justify-between">
+                <span>Tổng dịch vụ:</span>
+                <span className="font-bold text-indigo-700">
+                  {services.reduce((sum, s) => sum + (s.thanhTien || 0), 0).toLocaleString()} đ
+                </span>
+              </p>
+              <p className="flex justify-between text-4xl font-bold text-green-600 border-t-4 border-green-600 pt-6">
+                <span>TỔNG CỘNG:</span>
+                <span>{totalAmount.toLocaleString()} đ</span>
               </p>
             </div>
 
-            <div className="text-center space-y-6">
+            <div className="text-center space-y-8">
               <p className="text-2xl">
                 Trạng thái thanh toán:{" "}
-                <span className={`inline-block px-6 py-3 rounded-full font-bold text-xl ${
+                <span className={`inline-block px-8 py-4 rounded-full font-bold text-xl ${
                   repair.thanhToanStatus === "Đã thanh toán"
                     ? "bg-green-100 text-green-800"
                     : repair.thanhToanStatus === "Chờ chuyển khoản"
@@ -377,24 +372,34 @@ export default function RepairDetail() {
                 </span>
               </p>
 
-              {/* Nút thanh toán nếu chưa thanh toán */}
-              {repair.thanhToanStatus !== "Đã thanh toán" && (
+              {/* KHÁCH HÀNG: Chỉ thanh toán bằng QR */}
+              {isCustomer && repair.thanhToanStatus !== "Đã thanh toán" && (
+                <button
+                  onClick={handleGetQR}
+                  className="px-20 py-8 bg-gradient-to-r from-green-500 to-emerald-600 text-white rounded-3xl font-bold text-3xl shadow-2xl hover:shadow-3xl transition transform hover:scale-105 flex items-center gap-6 mx-auto"
+                >
+                  <QrCode size={48} />
+                  Thanh toán chuyển khoản
+                </button>
+              )}
+
+              {/* ADMIN: Có cả tiền mặt + xác nhận thủ công */}
+              {isStaff && repair.thanhToanStatus !== "Đã thanh toán" && (
                 <button
                   onClick={() => setShowPaymentModal(true)}
-                  className="px-16 py-6 bg-gradient-to-r from-green-500 to-emerald-600 text-white rounded-2xl font-bold text-2xl shadow-2xl hover:shadow-3xl transition flex items-center gap-4 mx-auto"
+                  className="px-20 py-8 bg-gradient-to-r from-green-500 to-emerald-600 text-white rounded-3xl font-bold text-3xl shadow-2xl hover:shadow-3xl transition transform hover:scale-105 flex items-center gap-6 mx-auto"
                 >
-                  <CreditCard size={36} />
+                  <CreditCard size={48} />
                   Thanh toán ngay
                 </button>
               )}
 
-              {/* Nút xác nhận thủ công nếu đang chờ chuyển khoản */}
-              {repair.thanhToanStatus === "Chờ chuyển khoản" && (
+              {isStaff && repair.thanhToanStatus === "Chờ chuyển khoản" && (
                 <button
                   onClick={handleConfirmPayment}
-                  className="px-12 py-5 bg-orange-500 text-white rounded-2xl font-bold text-xl shadow-xl hover:shadow-2xl transition flex items-center gap-3 mx-auto"
+                  className="px-16 py-6 bg-orange-500 text-white rounded-3xl font-bold text-2xl shadow-2xl hover:shadow-3xl transition flex items-center gap-4 mx-auto"
                 >
-                  <CheckCircle size={32} />
+                  <CheckCircle size={40} />
                   Xác nhận đã nhận tiền
                 </button>
               )}
@@ -402,53 +407,38 @@ export default function RepairDetail() {
           </div>
         </div>
 
-        {/* Modal chọn phương thức thanh toán */}
-        {showPaymentModal && (
+        {/* Modal thanh toán (chỉ admin) */}
+        {showPaymentModal && isStaff && (
           <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-6">
             <div className="bg-white rounded-3xl shadow-2xl p-12 w-full max-w-lg">
               <h3 className="text-4xl font-bold text-center mb-12">Chọn phương thức thanh toán</h3>
               <div className="space-y-8">
-                <button
-                  onClick={handlePayCash}
-                  className="w-full py-8 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-2xl font-bold text-2xl hover:shadow-2xl transition"
-                >
-                  💵 Tiền mặt
+                <button onClick={handlePayCash} className="w-full py-8 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-2xl font-bold text-2xl hover:shadow-2xl transition">
+                  Tiền mặt
                 </button>
-                <button
-                  onClick={handleGetQR}
-                  className="w-full py-8 bg-gradient-to-r from-green-500 to-emerald-600 text-white rounded-2xl font-bold text-2xl hover:shadow-2xl transition flex items-center justify-center gap-4"
-                >
+                <button onClick={handleGetQR} className="w-full py-8 bg-gradient-to-r from-green-500 to-emerald-600 text-white rounded-2xl font-bold text-2xl hover:shadow-2xl transition flex items-center justify-center gap-4">
                   <QrCode size={40} />
                   Chuyển khoản (QR Code)
                 </button>
               </div>
-              <button
-                onClick={() => setShowPaymentModal(false)}
-                className="w-full mt-10 text-gray-600 font-bold text-xl hover:underline"
-              >
+              <button onClick={() => setShowPaymentModal(false)} className="w-full mt-10 text-gray-600 font-bold text-xl hover:underline">
                 Hủy bỏ
               </button>
             </div>
           </div>
         )}
 
-        {/* Hiển thị QR chuyển khoản */}
-        {paymentMethod === "transfer" && qrCode && (
+        {/* QR Code */}
+        {qrCode && (
           <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-6">
             <div className="bg-white rounded-3xl shadow-2xl p-12 text-center max-w-lg">
               <h3 className="text-4xl font-bold mb-10">Quét QR để chuyển khoản</h3>
               <img src={qrCode} alt="QR Thanh toán" className="mx-auto mb-10 w-96 h-96" />
               <p className="text-2xl font-bold mb-4">Số tiền: {totalAmount.toLocaleString()} đ</p>
               <p className="text-xl text-gray-700 mb-10">
-                Vui lòng ghi nội dung chuyển khoản: <span className="font-bold text-indigo-600">{maPhieu}</span>
+                Nội dung chuyển khoản: <span className="font-bold text-indigo-600">{maPhieu}</span>
               </p>
-              <button
-                onClick={() => {
-                  setPaymentMethod(null);
-                  setQrCode(null);
-                }}
-                className="px-16 py-6 bg-gray-300 rounded-2xl font-bold text-xl hover:bg-gray-400 transition"
-              >
+              <button onClick={() => { setQrCode(null); }} className="px-16 py-6 bg-gray-300 rounded-2xl font-bold text-xl hover:bg-gray-400 transition">
                 Đóng
               </button>
             </div>
@@ -456,7 +446,7 @@ export default function RepairDetail() {
         )}
 
         {/* Modal thêm phụ tùng */}
-        {showAddPart && (
+        {isStaff && showAddPart && (
           <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-6">
             <div className="bg-white rounded-3xl shadow-2xl p-12 w-full max-w-2xl">
               <h2 className="text-5xl font-bold text-center mb-12 text-purple-600">Thêm Phụ Tùng</h2>
@@ -495,7 +485,7 @@ export default function RepairDetail() {
         )}
 
         {/* Modal thêm dịch vụ */}
-        {showAddService && (
+        {isStaff &&showAddService && (
           <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-6">
             <div className="bg-white rounded-3xl shadow-2xl p-12 w-full max-w-2xl">
               <h2 className="text-5xl font-bold text-center mb-12 text-indigo-600">Thêm Dịch Vụ</h2>

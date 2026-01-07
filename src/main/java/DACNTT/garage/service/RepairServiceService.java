@@ -8,4 +8,5 @@ public interface RepairServiceService {
     RepairService save(RepairService repairService);
     void deleteById(RepairServiceId id);
     boolean existsById(RepairServiceId id);
+    Double sumThanhTienByMaPhieu(String maPhieu);
 }

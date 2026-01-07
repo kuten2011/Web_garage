@@ -1,4 +1,3 @@
-// src/main/java/DACNTT/garage/controller/RepairPartController.java
 package DACNTT.garage.controller;
 
 import DACNTT.garage.dto.RepairPartDTO;
@@ -10,19 +9,17 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/admin/repair-parts")
 public class RepairPartController {
 
     @Autowired private RepairPartHandle repairPartHandle;
 
-    // Lấy danh sách phụ tùng theo phiếu
-    @GetMapping("/phieu/{maPhieu}")
+    @GetMapping("/customer/repair-parts/phieu/{maPhieu}")
     public ResponseEntity<List<RepairPartDTO>> getPartsByPhieu(@PathVariable String maPhieu) {
         return repairPartHandle.getPartsByPhieu(maPhieu);
     }
 
     // Thêm phụ tùng vào phiếu
-    @PostMapping("/phieu/{maPhieu}")
+    @PostMapping("/admin/repair-parts/phieu/{maPhieu}")
     public ResponseEntity<RepairPartDTO> addPart(
             @PathVariable String maPhieu,
             @RequestBody RepairPartDTO dto) {
@@ -31,7 +28,7 @@ public class RepairPartController {
     }
 
     // Xóa phụ tùng khỏi phiếu
-    @DeleteMapping("/phieu/{maPhieu}/phutung/{maPT}")
+    @DeleteMapping("/admin/repair-parts/phieu/{maPhieu}/phutung/{maPT}")
     public ResponseEntity<Void> removePart(
             @PathVariable String maPhieu,
             @PathVariable String maPT) {

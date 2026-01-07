@@ -1,6 +1,7 @@
 package DACNTT.garage.service;
 
 import DACNTT.garage.model.Repair;
+import DACNTT.garage.repository.CustomerRepository;
 import DACNTT.garage.repository.RepairRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -8,6 +9,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -16,6 +18,9 @@ public class RepairServiceImpl implements RepairService {
 
     @Autowired
     private RepairRepository repairRepository;
+
+    @Autowired
+    private CustomerRepository customerRepository;
 
     @Override
     public Page<Repair> getAllRepairs(Pageable pageable) {
@@ -97,4 +102,9 @@ public class RepairServiceImpl implements RepairService {
     public Repair save(Repair repair) {
         return repairRepository.save(repair);
     }
+
+//    @Override
+//    public Page<Repair> findByMaKH(String maKH, Pageable pageable) {
+//        return repairRepository.findByLichHen_KhachHang_MaKH(customerRepository.findByEmail(maKH).get().getMaKH(), pageable);
+//    }
 }

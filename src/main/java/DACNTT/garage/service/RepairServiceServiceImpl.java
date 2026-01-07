@@ -28,4 +28,9 @@ public class RepairServiceServiceImpl implements RepairServiceService {
     public boolean existsById(RepairServiceId id) {
         return repairServiceRepository.existsById(id);
     }
+
+    @Override
+    public Double sumThanhTienByMaPhieu(String maPhieu) {
+        return repairServiceRepository.sumThanhTienByMaPhieu(maPhieu);
+    }
 }

@@ -10,6 +10,8 @@ import {
   Package,       
   Info,          
   PhoneCall,     
+  ClipboardList, 
+  User,          
 } from "lucide-react";
 import { useNavigate, useLocation } from "react-router-dom";
 
@@ -20,7 +22,8 @@ export default function Header({ isScrolled }) {
 
   // Kiểm tra đăng nhập và role
   const token = localStorage.getItem("token");
-  const userData = localStorage.getItem("user");
+  const userData = JSON.parse(localStorage.getItem("user") || "{}");
+  const maKH = userData.username || "";
   const isLoggedIn = !!token;
 
   let isStaff = false;
@@ -45,12 +48,19 @@ export default function Header({ isScrolled }) {
     { label: "Liên hệ",  route: "/#contact", icon: <PhoneCall size={18} /> },
   ];
 
-  const finalMenuItems = isStaff
+  // Thêm tab Phiếu Sửa Chữa ở cuối nếu đã đăng nhập (cả staff và customer đều thấy)
+  const finalMenuItems = isLoggedIn
     ? [
-        { label: "Quản trị", route: "/admin", icon: <Wrench size={18} /> },
         ...menuItems,
+        { label: "Phiếu Sửa Chữa", route: "/my-repairs", icon: <ClipboardList size={18} /> },
+        { label: maKH, route: "/account", icon: <User size={18} /> },
       ]
     : menuItems;
+
+  // Nếu là staff thì thêm Quản trị ở đầu
+  if (isStaff) {
+    finalMenuItems.unshift({ label: "Quản trị", route: "/admin", icon: <Wrench size={18} /> });
+  }
 
   const isActive = (itemRoute) => {
     if (itemRoute.includes("#")) {
@@ -84,7 +94,7 @@ export default function Header({ isScrolled }) {
     >
       <div className="container mx-auto px-4">
         <div className="flex justify-between items-center py-4">
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-3 cursor-pointer" onClick={() => navigate("/")}>
             <div className="w-12 h-12 bg-yellow-400 rounded-full flex items-center justify-center text-gray-900 font-bold text-xl">
               G
             </div>

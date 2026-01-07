@@ -20,8 +20,8 @@ public class BookingDTO {
     private String maLich;
     private String maKH;
     private String hoTenKH;
-    private String bienSo;
     private LocalDate ngayHen;
     private LocalTime gioHen;
     private String trangThai;
+    private String ghiChu;
 }

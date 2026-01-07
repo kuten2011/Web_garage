@@ -23,8 +23,9 @@ import PaymentFailed from "./payment/PaymentFailed";
 
 import Services from "./customer/Services";
 import Parts from "./customer/Parts";
-import CustomerLayout from "./customer/CustomerLayout"; // Import CustomerLayout
-import HomeContent from "./customer/HomeContent"; // Thêm mới: HomeContent từ nội dung GarageWebsite
+import CustomerLayout from "./customer/CustomerLayout"; 
+import HomeContent from "./customer/HomeContent"; 
+import MyRepairs from "./customer/MyRepairs";
 
 // Component bảo vệ route admin
 function ProtectedAdminRoute({ children }) {
@@ -50,6 +51,8 @@ export default function App() {
         <Route path="/" element={<CustomerLayout><HomeContent /></CustomerLayout>} />
         <Route path="/services" element={<CustomerLayout><Services /></CustomerLayout>} />
         <Route path="/parts" element={<CustomerLayout><Parts /></CustomerLayout>} />
+        <Route path="/my-repairs" element={<CustomerLayout><MyRepairs /></CustomerLayout>} />
+        <Route path="/customer/repairParts/:maPhieu" element={<CustomerLayout><RepairDetail /></CustomerLayout>} />
 
         {/* Payment Routes */}
         <Route path="/payment/success" element={<PaymentSuccess />} />
@@ -72,7 +75,6 @@ export default function App() {
           <Route index element={<AdminDashboard />} />
           <Route path="bookings" element={<BookingManager />} />
           <Route path="repairs" element={<RepairManager />} />
-          <Route path="repairParts/:maPhieu" element={<RepairDetail />} />
           <Route path="parts" element={<PartManager />} />
           <Route path="services" element={<ServiceManager />} />
           <Route path="employees" element={<EmployeeManager />} />

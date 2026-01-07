@@ -45,7 +45,7 @@ public class SecurityConfig {
                                 "/css/**", "/js/**", "/img/**", "/favicon.ico").permitAll()
 
                         // login backend
-                        .requestMatchers("/web_garage/auth/**", "/chatbot/**").permitAll()
+                        .requestMatchers("/web_garage/auth/**", "/chatbot/**", "/customer/**").permitAll()
 
                         // cho phép GET parts + services nếu bạn muốn xem public
                         .requestMatchers(HttpMethod.GET, "/admin/parts/**", "/admin/services/**").permitAll()

@@ -9,18 +9,17 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/admin/repair-services")
 public class RepairServiceController {
 
     @Autowired
     private RepairServiceHandle repairServiceHandle;
 
-    @GetMapping("/phieu/{maPhieu}")
+    @GetMapping("/customer/repair-services/phieu/{maPhieu}")
     public ResponseEntity<List<RepairServiceDTO>> getServicesByPhieu(@PathVariable String maPhieu) {
         return repairServiceHandle.getServicesByPhieu(maPhieu);
     }
 
-    @PostMapping("/phieu/{maPhieu}")
+    @PostMapping("/admin/repair-services/phieu/{maPhieu}")
     public ResponseEntity<RepairServiceDTO> addService(
             @PathVariable String maPhieu,
             @RequestBody RepairServiceDTO dto) {
@@ -28,7 +27,7 @@ public class RepairServiceController {
         return repairServiceHandle.addService(dto);
     }
 
-    @DeleteMapping("/phieu/{maPhieu}/dichvu/{maDV}")
+    @DeleteMapping("/admin/repair-services/phieu/{maPhieu}/dichvu/{maDV}")
     public ResponseEntity<Void> removeService(
             @PathVariable String maPhieu,
             @PathVariable String maDV) {
