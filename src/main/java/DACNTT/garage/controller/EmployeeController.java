@@ -1,13 +1,12 @@
 package DACNTT.garage.controller;
 
+import DACNTT.garage.dto.CreateEmployeeDTO;
 import DACNTT.garage.dto.EmployeeDTO;
 import DACNTT.garage.handle.EmployeeHandle;
 import DACNTT.garage.model.Employee;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -20,5 +19,10 @@ public class EmployeeController {
     @GetMapping(value = {"", "/"})
     public ResponseEntity<?> getEmployees() {
         return employeeHandle.getAllEmployees();
+    }
+
+    @PostMapping(value = "/")
+    public ResponseEntity<?> addEmployee(@RequestBody CreateEmployeeDTO employeeDTO) {
+        return employeeHandle.createEmployee(employeeDTO);
     }
 }
