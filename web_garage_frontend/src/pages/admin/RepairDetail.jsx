@@ -21,6 +21,10 @@ const REPAIR_API = `${API_BASE}/repairs`;
 const REPAIR_PART_API = `${API_BASE}/repair-parts/phieu`;
 const REPAIR_SERVICE_API = `${API_BASE}/repair-services/phieu`;
 
+const API_BASEE = "http://localhost:8080/admin";
+const REPAIR_PART_APII = `${API_BASEE}/repair-parts/phieu`;
+const REPAIR_SERVICE_APII = `${API_BASEE}/repair-services/phieu`;
+
 export default function RepairDetail() {
   const { maPhieu } = useParams();
   const [repair, setRepair] = useState(null);
@@ -63,6 +67,7 @@ export default function RepairDetail() {
       const totalParts = (partsRes.data || []).reduce((sum, p) => sum + (p.thanhTien || 0), 0);
       const totalServices = (servicesRes.data || []).reduce((sum, s) => sum + (s.thanhTien || 0), 0);
       setTotalAmount(totalParts + totalServices);
+
     } catch (err) {
       console.error("Lỗi tải dữ liệu:", err);
       alert("Không thể tải chi tiết phiếu sửa chữa!");
@@ -80,7 +85,7 @@ export default function RepairDetail() {
     if (!isStaff) return;
     if (!newPart.maPT.trim()) return alert("Vui lòng nhập mã phụ tùng!");
     try {
-      await axiosInstance.post(`${REPAIR_PART_API}/${maPhieu}`, newPart);
+      await axiosInstance.post(`${REPAIR_PART_APII}/${maPhieu}`, newPart);
       alert("Thêm phụ tùng thành công!");
       setShowAddPart(false);
       setNewPart({ maPT: "", soLuong: 1 });
@@ -94,7 +99,7 @@ export default function RepairDetail() {
     if (!isStaff) return;
     if (!window.confirm("Xóa phụ tùng này khỏi phiếu?")) return;
     try {
-      await axiosInstance.delete(`${REPAIR_PART_API}/${maPhieu}/phutung/${maPT}`);
+      await axiosInstance.delete(`${REPAIR_PART_APII}/${maPhieu}/phutung/${maPT}`);
       fetchData();
     } catch (err) {
       alert("Xóa thất bại!");
@@ -105,7 +110,7 @@ export default function RepairDetail() {
     if (!isStaff) return;
     if (!newService.maDV.trim()) return alert("Vui lòng nhập mã dịch vụ!");
     try {
-      await axiosInstance.post(`${REPAIR_SERVICE_API}/${maPhieu}`, newService);
+      await axiosInstance.post(`${REPAIR_SERVICE_APII}/${maPhieu}`, newService);
       alert("Thêm dịch vụ thành công!");
       setShowAddService(false);
       setNewService({ maDV: "", soLuong: 1 });
@@ -119,7 +124,7 @@ export default function RepairDetail() {
     if (!isStaff) return;
     if (!window.confirm("Xóa dịch vụ này khỏi phiếu?")) return;
     try {
-      await axiosInstance.delete(`${REPAIR_SERVICE_API}/${maPhieu}/dichvu/${maDV}`);
+      await axiosInstance.delete(`${REPAIR_SERVICE_APII}/${maPhieu}/dichvu/${maDV}`);
       fetchData();
     } catch (err) {
       alert("Xóa thất bại!");
@@ -130,7 +135,7 @@ export default function RepairDetail() {
   const handlePayCash = async () => {
     if (!isStaff) return;
     try {
-      await axiosInstance.post(`${API_BASE}/repairs/${maPhieu}/pay-cash`);
+      await axiosInstance.post(`${API_BASEE}/repairs/${maPhieu}/pay-cash`);
       alert("Thanh toán tiền mặt thành công!");
       fetchData();
       setShowPaymentModal(false);
@@ -154,7 +159,7 @@ export default function RepairDetail() {
     if (!isStaff) return;
     if (!window.confirm("Xác nhận đã nhận tiền chuyển khoản cho phiếu này?")) return;
     try {
-      await axiosInstance.post(`${API_BASE}/repairs/${maPhieu}/confirm-payment`);
+      await axiosInstance.post(`${API_BASEE}/repairs/${maPhieu}/confirm-payment`);
       alert("Xác nhận thành công!");
       fetchData();
       setQrCode(null);

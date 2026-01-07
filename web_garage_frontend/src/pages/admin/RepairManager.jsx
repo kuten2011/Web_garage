@@ -29,6 +29,9 @@ export default function RepairManager() {
   const [showForm, setShowForm] = useState(false);
   const [editingItem, setEditingItem] = useState(null);
 
+  // Cache danh sách nhân viên: maNV → { hoTen, tenChiNhanh }
+  const [employees, setEmployees] = useState({});
+
   const [formData, setFormData] = useState({
     maLich: "",
     maNV: "",
@@ -37,6 +40,26 @@ export default function RepairManager() {
     trangThai: "Chờ tiếp nhận",
     bienSo: "",
   });
+
+  // Load danh sách nhân viên khi component mount
+  useEffect(() => {
+    const fetchEmployees = async () => {
+      try {
+        const res = await axiosInstance.get(`${API_BASE}/employees`);
+        const empMap = {};
+        (res.data.content || res.data).forEach((emp) => {
+          empMap[emp.maNV] = {
+            hoTen: emp.hoTen || "Không tên",
+            maChiNhanh: emp.chiNhanh?.maChiNhanh || "",
+          };
+        });
+        setEmployees(empMap);
+      } catch (err) {
+        console.error("Lỗi tải danh sách nhân viên:", err);
+      }
+    };
+    fetchEmployees();
+  }, []);
 
   const fetchData = async () => {
     try {
@@ -198,7 +221,7 @@ export default function RepairManager() {
           </div>
         </div>
 
-        {/* Bảng danh sách – GỌN GÀNG & VỪA MẮT */}
+        {/* Bảng danh sách */}
         <div className="bg-white rounded-2xl shadow overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
@@ -226,7 +249,20 @@ export default function RepairManager() {
                     <tr key={r.maPhieu} className="hover:bg-indigo-50/50 transition">
                       <td className="px-4 py-4 font-medium text-indigo-700">{r.maPhieu}</td>
                       <td className="px-4 py-4 text-gray-700">{r.maLich || "Chưa có"}</td>
-                      <td className="px-4 py-4 text-gray-700">{r.maNV || "Chưa phân công"}</td>
+                      <td className="px-4 py-4 text-gray-700">
+                        {r.maNV && employees[r.maNV] ? (
+                          <div>
+                            <div className="font-medium">{employees[r.maNV].hoTen}</div>
+                            <div className="text-xs text-gray-500">
+                              {r.maNV} {employees[r.maNV].maChiNhanh}
+                            </div>
+                          </div>
+                        ) : r.maNV ? (
+                          <span className="text-gray-500 italic">Đang tải...</span>
+                        ) : (
+                          <span className="text-orange-600 font-medium">Chưa phân công</span>
+                        )}
+                      </td>
                       <td className="px-4 py-4 text-gray-800 font-medium">{r.khachHang?.hoTen || "N/A"}</td>
                       <td className="px-4 py-4 font-mono font-bold text-purple-700">{r.xe?.bienSo || "Chưa có"}</td>
                       <td className="px-4 py-4 text-center text-gray-700">{r.ngayLap || "-"}</td>

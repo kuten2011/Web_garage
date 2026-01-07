@@ -29,6 +29,7 @@ public class Feedback {
     @Column(nullable = false)
     private LocalDateTime ngayGui = LocalDateTime.now();
 
+    @Builder.Default
     private String trangThai = "Chưa phản hồi";
 
     private String phanHoiQL;

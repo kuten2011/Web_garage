@@ -6,23 +6,35 @@ import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, Responsi
 const API = "http://localhost:8080/admin/reports";
 
 export default function ReportManager() {
+  const [allReports, setAllReports] = useState([]); // Lưu tất cả báo cáo từ backend
+  const [filteredData, setFilteredData] = useState([]); // Dữ liệu lọc cho biểu đồ
   const [summary, setSummary] = useState({ totalBranches: 0, totalRevenue: 0, totalCars: 0 });
-  const [monthlyData, setMonthlyData] = useState([]);
   const [loading, setLoading] = useState(true);
+
+  // Bộ lọc: từ tháng đến tháng (YYYY-MM)
+  const [fromMonth, setFromMonth] = useState("");
+  const [toMonth, setToMonth] = useState("");
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [summaryRes, monthlyRes] = await Promise.all([
-          axiosInstance.get(`${API}/summary`),
-          axiosInstance.get(`${API}/last12months`)
+        const [allRes, summaryRes] = await Promise.all([
+          axiosInstance.get(`${API}`), // Lấy tất cả báo cáo
+          axiosInstance.get(`${API}/summary`)
         ]);
+
+        // Lưu tất cả báo cáo (đã sort theo tháng)
+        const reports = allRes.data
+          .sort((a, b) => a.thangNam.localeCompare(b.thangNam))
+          .map(item => ({
+            month: item.thangNam,
+            revenue: item.doanhThu || 0,
+            cars: item.soXePhucVu || 0
+          }));
+
+        setAllReports(reports);
+        setFilteredData(reports); // Ban đầu hiển thị tất cả
         setSummary(summaryRes.data);
-        setMonthlyData(monthlyRes.data.map(item => ({
-          month: item.thangNam,
-          revenue: item.doanhThu || 0,
-          cars: item.soXePhucVu || 0
-        })));
       } catch (err) {
         alert("Lỗi tải báo cáo!");
       } finally {
@@ -32,6 +44,33 @@ export default function ReportManager() {
     fetchData();
   }, []);
 
+  // Áp dụng filter khi fromMonth/toMonth thay đổi
+  useEffect(() => {
+    if (!allReports.length) return;
+
+    let filtered = allReports;
+
+    if (fromMonth) {
+      filtered = filtered.filter(item => item.month >= fromMonth);
+    }
+
+    if (toMonth) {
+      filtered = filtered.filter(item => item.month <= toMonth);
+    }
+
+    setFilteredData(filtered);
+
+    // Cập nhật summary theo filtered data
+    const totalRevenue = filtered.reduce((sum, item) => sum + item.revenue, 0);
+    const totalCars = filtered.reduce((sum, item) => sum + item.cars, 0);
+
+    setSummary(prev => ({
+      ...prev,
+      totalRevenue,
+      totalCars
+    }));
+  }, [fromMonth, toMonth, allReports]);
+
   const formatCurrency = (value) => {
     return new Intl.NumberFormat("vi-VN", { style: "currency", currency: "VND" }).format(value);
   };
@@ -39,63 +78,78 @@ export default function ReportManager() {
   return (
     <div className="min-h-screen bg-gray-50 py-8 px-6">
       <div className="max-w-7xl mx-auto">
+        <h1 className="text-3xl font-bold text-gray-800 mb-8 flex items-center gap-3">
+          <TrendingUp size={32} className="text-indigo-600" />
+          Báo Cáo Doanh Thu & Hoạt Động
+        </h1>
 
-        {/* Header */}
-        <div className="mb-10">
-          <h1 className="text-5xl font-bold text-gray-800 flex items-center gap-5">
-            <TrendingUp className="text-indigo-600" size={56} />
-            Báo Cáo Doanh Thu & Hoạt Động
-          </h1>
-        </div>
-
-        {/* Tổng hợp nhanh */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">
-          <div className="bg-gradient-to-br from-blue-50 to-blue-100 p-8 rounded-3xl shadow-xl">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-blue-600 font-bold text-xl">Tổng chi nhánh</p>
-                <p className="text-5xl font-bold text-blue-800 mt-3">{summary.totalBranches}</p>
-              </div>
-              <Building size={64} className="text-blue-600 opacity-70" />
+        {/* Bộ lọc */}
+        <div className="bg-white rounded-2xl shadow p-6 mb-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Từ tháng</label>
+              <input
+                type="month"
+                value={fromMonth}
+                onChange={(e) => setFromMonth(e.target.value)}
+                className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none"
+              />
             </div>
-          </div>
-
-          <div className="bg-gradient-to-br from-green-50 to-green-100 p-8 rounded-3xl shadow-xl">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-green-600 font-bold text-xl">Tổng doanh thu</p>
-                <p className="text-5xl font-bold text-green-800 mt-3">
-                  {formatCurrency(summary.totalRevenue)}
-                </p>
-              </div>
-              <DollarSign size={64} className="text-green-600 opacity-70" />
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Đến tháng</label>
+              <input
+                type="month"
+                value={toMonth}
+                onChange={(e) => setToMonth(e.target.value)}
+                className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none"
+              />
             </div>
-          </div>
-
-          <div className="bg-gradient-to-br from-purple-50 to-purple-100 p-8 rounded-3xl shadow-xl">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-purple-600 font-bold text-xl">Số xe phục vụ</p>
-                <p className="text-5xl font-bold text-purple-800 mt-3">{summary.totalCars}</p>
-              </div>
-              <Car size={64} className="text-purple-600 opacity-70" />
+            <div className="flex items-end">
+              <button
+                onClick={() => { setFromMonth(""); setToMonth(""); }}
+                className="w-full px-4 py-3 bg-gray-200 text-gray-700 rounded-xl font-medium hover:bg-gray-300 transition"
+              >
+                Xóa bộ lọc
+              </button>
             </div>
           </div>
         </div>
 
-        {/* Biểu đồ doanh thu 12 tháng */}
-        <div className="bg-white rounded-3xl shadow-2xl p-10">
-          <h2 className="text-4xl font-bold mb-8 text-gray-800 flex items-center gap-4">
-            <Calendar size={40} className="text-indigo-600" />
-            Doanh thu & Số xe phục vụ 12 tháng gần nhất
-          </h2>
+        {/* Thống kê tổng hợp */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
+          {[
+            { label: "Tổng chi nhánh", value: summary.totalBranches, icon: Building, color: "bg-indigo-600" },
+            { label: "Tổng doanh thu", value: formatCurrency(summary.totalRevenue), icon: DollarSign, color: "bg-green-600" },
+            { label: "Tổng xe phục vụ", value: summary.totalCars, icon: Car, color: "bg-purple-600" },
+          ].map((stat) => {
+            const Icon = stat.icon;
+            return (
+              <div key={stat.label} className="bg-white rounded-2xl shadow-xl p-6 hover:shadow-2xl transition-all">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-gray-500 text-sm mb-2">{stat.label}</p>
+                    <p className="text-3xl font-bold">{stat.value}</p>
+                  </div>
+                  <div className={`${stat.color} p-3 rounded-full text-white`}>
+                    <Icon className="w-6 h-6" />
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
 
-          {loading ? (
-            <div className="h-96 flex items-center justify-center text-2xl text-gray-500">Đang tải biểu đồ...</div>
-          ) : (
+        {/* Biểu đồ */}
+        {loading ? (
+          <div className="text-center py-12 text-gray-500">Đang tải báo cáo...</div>
+        ) : filteredData.length === 0 ? (
+          <div className="text-center py-12 text-gray-400">Không có dữ liệu cho khoảng thời gian này</div>
+        ) : (
+          <div className="bg-white rounded-2xl shadow-xl p-6">
+            <h2 className="text-2xl font-bold text-gray-800 mb-6">Biểu đồ doanh thu & xe phục vụ</h2>
             <ResponsiveContainer width="100%" height={500}>
-              <LineChart data={monthlyData}>
-                <CartesianGrid strokeDasharray="3 3" />
+              <LineChart data={filteredData}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#ddd" />
                 <XAxis 
                   dataKey="month" 
                   tick={{ fill: "#555" }}
@@ -133,8 +187,8 @@ export default function ReportManager() {
                 />
               </LineChart>
             </ResponsiveContainer>
-          )}
-        </div>
+          </div>
+        )}
       </div>
     </div>
   );

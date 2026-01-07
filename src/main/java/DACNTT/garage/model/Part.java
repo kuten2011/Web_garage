@@ -21,6 +21,7 @@ public class Part {
     private Double donGia;
 
     @Column(nullable = false)
+    @Builder.Default
     private Integer soLuongTon = 0;
 
     @Column

@@ -60,6 +60,7 @@ public class RepairController {
     // THANH TOÁN TIỀN MẶT
     @PostMapping("/admin/repairs/{maPhieu}/pay-cash")
     public ResponseEntity<?> payWithCash(@PathVariable String maPhieu) {
+        repairHandle.updateSumMoney(maPhieu);
         return repairHandle.updatePaymentStatus(maPhieu, "Đã thanh toán", "Thanh toán tiền mặt");
     }
 
@@ -74,8 +75,6 @@ public class RepairController {
 
             double tongTienRaw = repair.getTongTien() != null ? repair.getTongTien() : 0.0;
             long tongTien = Math.round(tongTienRaw);
-
-            System.out.println(tongTienRaw);
 
             if (tongTien <= 0) {
                 return ResponseEntity.badRequest().body(Map.of("error", "Tổng tiền không hợp lệ"));

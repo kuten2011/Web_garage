@@ -28,11 +28,14 @@ public class RepairDTO {
     private CustomerDTO khachHang;
     private VehicleDTO xe;
 
+    @Builder.Default
     private boolean daDanhGia = false;
+
     private Integer soSao;
     private String noiDungPhanHoi;
     private LocalDateTime ngayDanhGia;
     private String phanHoiQL;
+
     public boolean isDaDanhGia() { return daDanhGia; }
     public void setDaDanhGia(boolean daDanhGia) { this.daDanhGia = daDanhGia; }
 }

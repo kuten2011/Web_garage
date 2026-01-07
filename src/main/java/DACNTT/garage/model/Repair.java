@@ -37,4 +37,6 @@ public class Repair {
     private String thanhToanStatus = "Chưa thanh toán";
 
     private Double tongTien = 0.0;
+
+    private LocalDate ngayHoanThanh; // Ngày hoàn thành sửa chữa (khi trạng thái = "Hoàn thành")
 }

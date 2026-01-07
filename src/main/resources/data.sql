@@ -26,12 +26,23 @@ VALUES
 ON CONFLICT ("maNV") DO NOTHING;
 
 -- Xe
-INSERT INTO "Xe" ("bienSo", "maKH", "hangXe", "mauXe", "soKm", "namSX")
-VALUES
-('59A-12345', 'KH01', 'Toyota', 'Trắng', 35000, 2019),
-('51B-67890', 'KH02', 'Honda', 'Đen', 27000, 2020),
-('50C-11223', 'KH03', 'Mazda', 'Đỏ', 15000, 2022)
-ON CONFLICT ("bienSo") DO NOTHING;
+INSERT INTO "Xe" (
+    "bienSo", "maKH", "hangXe", "mauXe", "soKm", "namSX",
+    "ngayBaoHanhDen", "ngayBaoDuongTiepTheo", "chuKyBaoDuongKm", "chuKyBaoDuongThang"
+) VALUES
+('59A-12345', 'KH01', 'Toyota', 'Camry', 35000, 2019, '2026-12-31', '2026-06-01', 10000, 12),
+('51B-67890', 'KH02', 'Honda', 'Civic', 27000, 2020, '2027-03-15', '2026-09-01', 8000, 6),
+('50C-11223', 'KH03', 'Mazda', 'CX-5', 15000, 2022, '2028-10-22', '2026-04-22', 10000, 12)
+ON CONFLICT ("bienSo") DO UPDATE SET
+    "maKH" = EXCLUDED."maKH",
+    "hangXe" = EXCLUDED."hangXe",
+    "mauXe" = EXCLUDED."mauXe",
+    "soKm" = EXCLUDED."soKm",
+    "namSX" = EXCLUDED."namSX",
+    "ngayBaoHanhDen" = EXCLUDED."ngayBaoHanhDen",
+    "ngayBaoDuongTiepTheo" = EXCLUDED."ngayBaoDuongTiepTheo",
+    "chuKyBaoDuongKm" = EXCLUDED."chuKyBaoDuongKm",
+    "chuKyBaoDuongThang" = EXCLUDED."chuKyBaoDuongThang";
 
 -- Lịch hẹn
 INSERT INTO "LichHen" ("maLich", "maKH", "ngayHen", "gioHen", "trangThai", "ghiChu")
@@ -116,18 +127,28 @@ VALUES
 ON CONFLICT ("maPT") DO NOTHING;
 
 -- PHIẾU SỬA CHỮA (ĐÃ THÊM bienSo VÀO INSERT)
-INSERT INTO "PhieuSuaChua" ("maPhieu", "maLich", "maNV", "ngayLap", "ghiChu", "trangThai", "bienSo")
-VALUES
-('PSC01', 'LH03', 'NV01', '2025-10-22', 'Bảo dưỡng định kỳ và thay phanh', 'Hoàn thành', '50C-11223')
-ON CONFLICT ("maPhieu") DO NOTHING;
+INSERT INTO "PhieuSuaChua" (
+    "maPhieu", "maLich", "maNV", "ngayLap", "ghiChu", "trangThai",
+    "thanhToanStatus", "tongTien", "bienSo", "ngayHoanThanh"
+) VALUES
+('PSC01', 'LH03', 'NV01', '2025-10-22', 'Bảo dưỡng định kỳ 10.000km + kiểm tra phanh + thay dầu',
+ 'Hoàn thành', 'Đã thanh toán', 2350000, '50C-11223', '2025-10-22'),
 
--- CHI TIẾT SỬA CHỮA - DỊCH VỤ (bảng mới, dùng maPhieu)
-INSERT INTO "CT_SuaChua_DichVu" ("maPhieu", "maDV", "soLuong", "ghiChu", "thanhTien")
-VALUES
-('PSC01', 'BD03', 1, 'Bảo dưỡng 10.000km: dầu, lốp, ắc quy, treo', 1200000),
-('PSC01', 'PH01', 1, 'Kiểm tra phanh trước, điều chỉnh má phanh', 300000),
-('PSC01', 'CS02', 1, 'Rửa xe cao cấp sau sửa chữa', 150000)
-ON CONFLICT ("maPhieu", "maDV") DO NOTHING;
+('PSC02', 'LH01', 'NV02', '2025-10-20', 'Xe không nổ máy, kiểm tra hệ thống khởi động',
+ 'Hoàn thành', 'Đã thanh toán', 1800000, '59A-12345', '2025-10-21'),
+
+('PSC03', 'LH02', 'NV03', '2025-10-21', 'Đề xe không nổ, kiểm tra ắc quy và bugi',
+ 'Hoàn thành', 'Chưa thanh toán', 1200000, '51B-67890', '2025-10-22')
+ON CONFLICT ("maPhieu") DO UPDATE SET
+    "maLich" = EXCLUDED."maLich",
+    "maNV" = EXCLUDED."maNV",
+    "ngayLap" = EXCLUDED."ngayLap",
+    "ghiChu" = EXCLUDED."ghiChu",
+    "trangThai" = EXCLUDED."trangThai",
+    "thanhToanStatus" = EXCLUDED."thanhToanStatus",
+    "tongTien" = EXCLUDED."tongTien",
+    "bienSo" = EXCLUDED."bienSo",
+    "ngayHoanThanh" = EXCLUDED."ngayHoanThanh";
 
 -- CHI TIẾT SỬA CHỮA - PHỤ TÙNG
 INSERT INTO "CT_SuaChua_PhuTung" ("maPhieu", "maPT", "soLuong", "thanhTien")

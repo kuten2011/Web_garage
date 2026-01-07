@@ -12,5 +12,6 @@ public interface RepairPartMapper {
     @Mapping(source = "phuTung.maPT", target = "maPT")
     @Mapping(source = "phuTung.tenPT", target = "tenPT")
     @Mapping(source = "phuTung.donGia", target = "donGia")
+    @Mapping(target = "soLuongTon", ignore = true)
     RepairPartDTO toRepairPartDTO(RepairPart repairPart);
 }

@@ -52,11 +52,15 @@ CREATE TABLE IF NOT EXISTS "Xe" (
     "mauXe" VARCHAR(50),
     "soKm" INTEGER,
     "namSX" INTEGER,
+    "ngayBaoHanhDen" DATE,
+    "ngayBaoDuongTiepTheo" DATE,
+    "chuKyBaoDuongKm" INTEGER DEFAULT 10000,
+    "chuKyBaoDuongThang" INTEGER DEFAULT 12,
     CONSTRAINT fk_xe_kh FOREIGN KEY ("maKH") REFERENCES "KhachHang"("maKH")
 );
 
 -- ===============================
--- BẢNG LỊCH HẸN (ĐÃ XÓA bienSo VÀ FK XE)
+-- BẢNG LỊCH HẸN
 -- ===============================
 CREATE TABLE IF NOT EXISTS "LichHen" (
     "maLich" VARCHAR(10) PRIMARY KEY,
@@ -101,7 +105,8 @@ CREATE TABLE IF NOT EXISTS "PhieuSuaChua" (
     "trangThai" VARCHAR(50) DEFAULT 'Chờ tiếp nhận',
     "thanhToanStatus" VARCHAR(50) DEFAULT 'Chưa thanh toán',
     "tongTien" NUMERIC(14,2) DEFAULT 0.0,
-    "bienSo" VARCHAR(10),  -- THÊM CỘT BIỂN SỐ XE
+    "bienSo" VARCHAR(10),
+    "ngayHoanThanh" DATE,
     CONSTRAINT fk_phieu_lich FOREIGN KEY ("maLich") REFERENCES "LichHen"("maLich"),
     CONSTRAINT fk_phieu_nv FOREIGN KEY ("maNV") REFERENCES "NhanVien"("maNV"),
     CONSTRAINT fk_phieu_xe FOREIGN KEY ("bienSo") REFERENCES "Xe"("bienSo")  -- THÊM FK ĐẾN BẢNG XE

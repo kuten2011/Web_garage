@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
@@ -28,4 +29,22 @@ public interface RepairRepository extends JpaRepository<Repair, String> {
     Optional<Repair> findByIdWithDetails(@Param("maPhieu") String maPhieu);
 
     List<Repair> findByLichHen_KhachHang_MaKH(String maKH);
+
+    // Tìm phiếu hoàn thành đúng vào ngày cụ thể
+    List<Repair> findByNgayHoanThanhAndTrangThai(LocalDate ngayHoanThanh, String trangThai);
+
+    @Query("""
+    SELECT r.lichHen.khachHang.maKH, 
+           r.lichHen.khachHang.hoTen, 
+           r.lichHen.khachHang.email, 
+           MAX(r.ngayLap)
+    FROM Repair r
+    WHERE r.ngayLap BETWEEN :fromDate AND :toDate
+    AND r.trangThai = 'Hoàn thành'
+    GROUP BY r.lichHen.khachHang.maKH, 
+             r.lichHen.khachHang.hoTen, 
+             r.lichHen.khachHang.email
+    """)
+    List<Object[]> findDormantCustomers(LocalDate fromDate, LocalDate toDate);
+
 }

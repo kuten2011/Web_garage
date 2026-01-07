@@ -2,14 +2,12 @@ package DACNTT.garage.handle;
 
 import DACNTT.garage.dto.RepairDTO;
 import DACNTT.garage.mapper.RepairMapper;
-import DACNTT.garage.model.Booking;
-import DACNTT.garage.model.Employee;
-import DACNTT.garage.model.Repair;
-import DACNTT.garage.model.Vehicle;
+import DACNTT.garage.model.*;
 import DACNTT.garage.repository.*;
 import DACNTT.garage.service.RepairPartService;
 import DACNTT.garage.service.RepairService;
 import DACNTT.garage.service.RepairServiceService;
+import jakarta.transaction.Transactional;
 import org.hibernate.Hibernate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.*;
@@ -17,6 +15,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 
+import java.time.LocalDate;
+import java.time.YearMonth;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -53,6 +54,15 @@ public class RepairHandle {
 
     @Autowired
     private CustomerRepository customerRepository;
+
+    @Autowired
+    private BranchRepository branchRepository;
+
+    @Autowired
+    private ReportRepository reportRepository;
+
+    private static final String MA_CHI_NHANH = "CN01"; // Có thể lấy động sau
+    private static final DateTimeFormatter THANG_NAM_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM");
 
     public ResponseEntity<Page<RepairDTO>> getAllRepairs(int page, int size, String sort) {
         Sort sortable = Sort.by(Sort.Direction.DESC, "ngayLap");
@@ -203,24 +213,6 @@ public class RepairHandle {
         }
     }
 
-    public RepairDTO getRepairDTOById(String maPhieu) {
-        Repair repair = repairService.findById(maPhieu);
-
-        RepairDTO dto = repairMapper.toRepairDTO(repair);
-
-        double tongDV = repairServiceService.sumThanhTienByMaPhieu(maPhieu);
-        double tongPT = repairPartService.sumThanhTienByMaPhieu(maPhieu);
-        double tongTien = tongDV + tongPT;
-
-        dto.setTongTien(tongTien);
-
-        if (dto.getThanhToanStatus() == null) {
-            dto.setThanhToanStatus("Chưa thanh toán");
-        }
-
-        return dto;
-    }
-
 //    public Page<RepairDTO> getRepairsByMaKH(String maKH, Pageable pageable) {
 //        Page<Repair> page = repairService.findByMaKH(maKH, pageable);
 //
@@ -263,5 +255,85 @@ public class RepairHandle {
                     return dto;
                 }).sorted((a, b) -> b.getNgayLap().compareTo(a.getNgayLap()))
                 .collect(Collectors.toList());
+    }
+
+    @Transactional
+    public Repair updateSumMoney(String maPhieu) {
+        // 1. Tìm phiếu sửa chữa
+        Repair repair = repairRepository.findById(maPhieu)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy phiếu sửa chữa với mã: " + maPhieu));
+
+        // 2. Tính tổng tiền phụ tùng + dịch vụ
+        double tongDV = repairServiceService.sumThanhTienByMaPhieu(maPhieu);
+        double tongPT = repairPartService.sumThanhTienByMaPhieu(maPhieu);
+        double tongTien = tongDV + tongPT;
+
+        // 3. Cập nhật tổng tiền và ngày hoàn thành cho phiếu sửa chữa
+        repair.setTongTien(tongTien);
+        repair.setNgayHoanThanh(LocalDate.now());
+
+        // 4. Cập nhật báo cáo doanh thu tháng hiện tại
+        String thangNamHienTai = YearMonth.now().format(THANG_NAM_FORMATTER); // "2026-01"
+
+        Report report = reportRepository
+                .findByChiNhanh_MaChiNhanhAndThangNam(MA_CHI_NHANH, thangNamHienTai)
+                .orElseGet(() -> {
+                    // Nếu chưa có báo cáo tháng này → tạo mới
+                    Report newReport = new Report();
+
+                    // Tạo mã báo cáo tự động (ví dụ: BC-CN01-202601)
+                    String maBC = "BC-" + MA_CHI_NHANH + "-" + thangNamHienTai.replace("-", "");
+                    newReport.setMaBC(maBC);
+
+                    // Giả sử bạn có cách lấy entity Branch, ví dụ:
+                    Branch chiNhanh = new Branch();
+                    chiNhanh.setMaChiNhanh(MA_CHI_NHANH);
+                    // Hoặc inject BranchRepository và findById
+                    newReport.setChiNhanh(chiNhanh);
+
+                    newReport.setThangNam(thangNamHienTai);
+                    newReport.setDoanhThu(0.0);
+                    newReport.setSoXePhucVu(0);
+
+                    return reportRepository.save(newReport); // lưu để có ID hợp lệ
+                });
+
+        // Cộng dồn doanh thu và số xe phục vụ
+        report.setDoanhThu(report.getDoanhThu() + tongTien);
+        report.setSoXePhucVu(report.getSoXePhucVu() + 1);
+
+        // Lưu lại
+        reportRepository.save(report);
+        return repairRepository.save(repair);
+    }
+
+    public RepairDTO getRepairDTOById(String maPhieu) {
+        Repair repair = repairRepository.findById(maPhieu)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy phiếu sửa chữa với mã: " + maPhieu));
+
+        RepairDTO dto = repairMapper.toRepairDTO(repair);
+
+        // Tính tổng tiền từ dịch vụ + phụ tùng
+        double tongDV = repairServiceService.sumThanhTienByMaPhieu(maPhieu);
+        double tongPT = repairPartService.sumThanhTienByMaPhieu(maPhieu);
+        double tongTien = tongDV + tongPT;
+
+        dto.setTongTien(tongTien);
+        repairRepository.save(repair);
+
+        // Mặc định trạng thái thanh toán nếu null
+        if (dto.getThanhToanStatus() == null) {
+            dto.setThanhToanStatus("Chưa thanh toán");
+        }
+
+        // Mặc định chi nhánh CN01 cho nhân viên nếu chưa có
+        if (repair.getNhanVien() != null && repair.getNhanVien().getChiNhanh() == null) {
+            Branch defaultBranch = branchRepository.findById("CN01")
+                    .orElseThrow(() -> new RuntimeException("Không tìm thấy chi nhánh"));
+            repair.getNhanVien().setChiNhanh(defaultBranch);
+            employeeRepository.save(repair.getNhanVien());
+        }
+
+        return dto;
     }
 }
