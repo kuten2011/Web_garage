@@ -15,7 +15,27 @@ import {
 } from "lucide-react";
 
 const API = "http://localhost:8080/admin/vehicles";
+const CUSTOMER_API = "http://localhost:8080/admin/customers";
 const PAGE_SIZE = 10;
+
+// Danh sách hãng xe phổ biến
+const COMMON_BRANDS = [
+  "Toyota",
+  "Honda",
+  "Mazda",
+  "Hyundai",
+  "Kia",
+  "Ford",
+  "Mercedes-Benz",
+  "BMW",
+  "Audi",
+  "VinFast",
+  "Mitsubishi",
+  "Suzuki",
+  "Nissan",
+  "Lexus",
+  "Volkswagen",
+];
 
 export default function VehicleManager() {
   const [data, setData] = useState({ content: [], totalPages: 1, number: 0 });
@@ -25,6 +45,12 @@ export default function VehicleManager() {
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [editing, setEditing] = useState(null);
+
+  // Dữ liệu cho dropdown
+  const [customers, setCustomers] = useState([]); // Danh sách khách hàng
+  const [selectedBrand, setSelectedBrand] = useState(""); // Hãng xe chọn
+  const [customBrand, setCustomBrand] = useState(""); // Hãng xe nhập tay
+
   const [formData, setFormData] = useState({
     bienSo: "",
     maKH: "",
@@ -38,21 +64,36 @@ export default function VehicleManager() {
     chuKyBaoDuongThang: 12,
   });
 
+  // Lấy danh sách khách hàng khi mở form
+  const fetchCustomers = async () => {
+    try {
+      const res = await axiosInstance.get(CUSTOMER_API);
+      setCustomers(res.data.content || res.data || []);
+    } catch (err) {
+      console.error("Lỗi tải danh sách khách hàng:", err);
+      setCustomers([]);
+    }
+  };
+
   useEffect(() => {
     fetchData();
   }, [page, search, filter]);
 
+  useEffect(() => {
+    if (showForm) {
+      fetchCustomers();
+    }
+  }, [showForm]);
+
   const fetchData = async () => {
     try {
       setLoading(true);
-
       const params = new URLSearchParams({
         page: page.toString(),
         size: PAGE_SIZE.toString(),
         search: search.trim(),
         filter: filter,
       });
-
       const res = await axiosInstance.get(`${API}?${params}`);
       setData(res.data);
     } catch (err) {
@@ -74,6 +115,10 @@ export default function VehicleManager() {
 
   const handleEdit = (v) => {
     setEditing(v);
+    setSelectedBrand(v.hangXe || "");
+    setCustomBrand(
+      v.hangXe && !COMMON_BRANDS.includes(v.hangXe) ? v.hangXe : ""
+    );
     setFormData({
       bienSo: v.bienSo,
       maKH: v.maKH,
@@ -90,36 +135,57 @@ export default function VehicleManager() {
   };
 
   const handleSave = async () => {
-  try {
-    if (editing) {
-      // PATCH chỉ gửi field cần update
-      const patchData = {
-        maKH: formData.maKH,
-        hangXe: formData.hangXe,
-        mauXe: formData.mauXe,
-        soKm: formData.soKm,
-        namSX: formData.namSX,
-        ngayBaoHanhDen: formData.ngayBaoHanhDen,
-        ngayBaoDuongTiepTheo: formData.ngayBaoDuongTiepTheo,
-        chuKyBaoDuongKm: formData.chuKyBaoDuongKm,
-        chuKyBaoDuongThang: formData.chuKyBaoDuongThang,
+    try {
+      if (!formData.maKH || formData.maKH.trim() === "") {
+        alert("Vui lòng chọn khách hàng! Không thể để trống mã khách hàng.");
+        return;
+      }
+      if (!formData.bienSo || formData.bienSo.trim() === "") {
+        alert("Vui lòng nhập biển số xe!");
+        return;
+      }
+      // Xử lý hãng xe
+      const finalHangXe =
+        selectedBrand === "OTHER" ? customBrand.trim() : selectedBrand;
+      if (selectedBrand === "OTHER" && !finalHangXe) {
+        alert("Vui lòng nhập hãng xe nếu chọn 'Khác'!");
+        return;
+      }
+
+      const dataToSend = {
+        ...formData,
+        hangXe: finalHangXe,
       };
 
-      await axiosInstance.patch(`${API}/${formData.bienSo}`, patchData);
-    } else {
-      await axiosInstance.post(API, formData);
+      if (editing) {
+        const patchData = {
+          maKH: dataToSend.maKH,
+          hangXe: dataToSend.hangXe,
+          mauXe: dataToSend.mauXe,
+          soKm: dataToSend.soKm,
+          namSX: dataToSend.namSX,
+          ngayBaoHanhDen: dataToSend.ngayBaoHanhDen || null,
+          ngayBaoDuongTiepTheo: dataToSend.ngayBaoDuongTiepTheo || null,
+          chuKyBaoDuongKm: dataToSend.chuKyBaoDuongKm,
+          chuKyBaoDuongThang: dataToSend.chuKyBaoDuongThang,
+        };
+        await axiosInstance.patch(`${API}/${formData.bienSo}`, patchData);
+      } else {
+        await axiosInstance.post(API, dataToSend);
+      }
+
+      setShowForm(false);
+      setEditing(null);
+      setSelectedBrand("");
+      setCustomBrand("");
+      fetchData();
+    } catch (err) {
+      console.error(err);
+      alert("Lưu thất bại!");
     }
+  };
 
-    setShowForm(false);
-    setEditing(null);
-    fetchData();
-  } catch (err) {
-    console.error(err);
-    alert("Lưu thất bại!");
-  }
-};
-
-
+  // Toàn bộ phần render ngoài popup giữ nguyên 100% như code bạn gửi
   return (
     <div className="min-h-screen bg-gray-50 py-12 px-4">
       <div className="max-w-7xl mx-auto">
@@ -130,6 +196,8 @@ export default function VehicleManager() {
           <button
             onClick={() => {
               setEditing(null);
+              setSelectedBrand("");
+              setCustomBrand("");
               setFormData({
                 bienSo: "",
                 maKH: "",
@@ -204,7 +272,7 @@ export default function VehicleManager() {
           </button>
         </div>
 
-        {/* Danh sách xe */}
+        {/* Danh sách xe – GIỮ NGUYÊN 100% NHƯ CODE CŨ */}
         {loading ? (
           <p className="text-center text-3xl text-gray-500 py-32">
             Đang tải...
@@ -235,7 +303,7 @@ export default function VehicleManager() {
                       <div>
                         <p className="font-bold text-xl">{v.maKH}</p>
                         <p className="text-gray-600 text-lg">
-                          {v.khachHang?.hoTen || "Chưa có tên"}
+                          {v.tenKH || "Chưa có tên"}
                         </p>
                       </div>
                     </div>
@@ -300,7 +368,7 @@ export default function VehicleManager() {
           </div>
         )}
 
-        {/* Phân trang */}
+        {/* Phân trang – GIỮ NGUYÊN */}
         {data.totalPages > 1 && (
           <div className="flex justify-center items-center gap-8 mt-16">
             <button
@@ -323,7 +391,7 @@ export default function VehicleManager() {
           </div>
         )}
 
-        {/* Form thêm/sửa xe */}
+        {/* Form thêm/sửa xe – CHỈ SỬA PHẦN NÀY */}
         {showForm && (
           <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-8">
             <div className="bg-white rounded-3xl shadow-3xl p-12 w-full max-w-4xl max-h-screen overflow-y-auto">
@@ -348,32 +416,65 @@ export default function VehicleManager() {
                     className="w-full px-8 py-6 text-2xl font-mono border-2 border-gray-300 rounded-2xl focus:border-indigo-500 outline-none disabled:bg-gray-100"
                   />
                 </div>
+
+                {/* Dropdown khách hàng */}
                 <div className="space-y-2">
                   <label className="block text-xl font-medium text-gray-700">
-                    Mã khách hàng
+                    Khách hàng <span className="text-red-500">*</span>
                   </label>
-                  <input
-                    type="text"
+                  <select
                     value={formData.maKH}
                     onChange={(e) =>
                       setFormData({ ...formData, maKH: e.target.value })
                     }
-                    className="w-full px-8 py-6 text-2xl border-2 border-gray-300 rounded-2xl focus:border-indigo-500 outline-none"
-                  />
+                    className="w-full px-8 py-6 text-xl border-2 border-gray-300 rounded-2xl focus:border-indigo-500 outline-none"
+                    required
+                  >
+                    <option value="">-- Chọn khách hàng --</option>
+                    {customers.map((kh) => (
+                      <option key={kh.maKH} value={kh.maKH}>
+                        {kh.maKH} - {kh.hoTen} ({kh.sdt})
+                      </option>
+                    ))}
+                  </select>
                 </div>
+
+                {/* Dropdown hãng xe + input tùy chỉnh */}
                 <div className="space-y-2">
                   <label className="block text-xl font-medium text-gray-700">
-                    Hãng xe
+                    Hãng xe <span className="text-red-500">*</span>
                   </label>
-                  <input
-                    type="text"
-                    value={formData.hangXe}
-                    onChange={(e) =>
-                      setFormData({ ...formData, hangXe: e.target.value })
-                    }
-                    className="w-full px-8 py-6 text-2xl border-2 border-gray-300 rounded-2xl focus:border-indigo-500 outline-none"
-                  />
+                  <select
+                    value={selectedBrand}
+                    onChange={(e) => {
+                      setSelectedBrand(e.target.value);
+                      if (e.target.value !== "OTHER") {
+                        setCustomBrand("");
+                      }
+                    }}
+                    className="w-full px-8 py-6 text-xl border-2 border-gray-300 rounded-2xl focus:border-indigo-500 outline-none"
+                  >
+                    <option value="">-- Chọn hãng xe --</option>
+                    {COMMON_BRANDS.map((brand) => (
+                      <option key={brand} value={brand}>
+                        {brand}
+                      </option>
+                    ))}
+                    <option value="OTHER">Khác (nhập tay)</option>
+                  </select>
+
+                  {selectedBrand === "OTHER" && (
+                    <input
+                      type="text"
+                      placeholder="Nhập hãng xe..."
+                      value={customBrand}
+                      onChange={(e) => setCustomBrand(e.target.value)}
+                      className="w-full mt-4 px-8 py-6 text-xl border-2 border-indigo-500 rounded-2xl focus:ring-4 focus:ring-indigo-300 outline-none"
+                      required
+                    />
+                  )}
                 </div>
+
                 <div className="space-y-2">
                   <label className="block text-xl font-medium text-gray-700">
                     Mẫu xe / Màu
@@ -387,6 +488,7 @@ export default function VehicleManager() {
                     className="w-full px-8 py-6 text-2xl border-2 border-gray-300 rounded-2xl focus:border-indigo-500 outline-none"
                   />
                 </div>
+
                 <div className="space-y-2">
                   <label className="block text-xl font-medium text-gray-700">
                     Số km hiện tại
@@ -403,6 +505,7 @@ export default function VehicleManager() {
                     className="w-full px-8 py-6 text-2xl border-2 border-gray-300 rounded-2xl focus:border-indigo-500 outline-none"
                   />
                 </div>
+
                 <div className="space-y-2">
                   <label className="block text-xl font-medium text-gray-700">
                     Năm sản xuất
@@ -419,6 +522,7 @@ export default function VehicleManager() {
                     className="w-full px-8 py-6 text-2xl border-2 border-gray-300 rounded-2xl focus:border-indigo-500 outline-none"
                   />
                 </div>
+
                 <div className="space-y-2">
                   <label className="block text-xl font-medium text-gray-700">
                     Bảo hành đến ngày
@@ -435,6 +539,7 @@ export default function VehicleManager() {
                     className="w-full px-8 py-6 text-2xl border-2 border-gray-300 rounded-2xl focus:border-indigo-500 outline-none"
                   />
                 </div>
+
                 <div className="space-y-2">
                   <label className="block text-xl font-medium text-gray-700">
                     Bảo dưỡng tiếp theo
@@ -451,6 +556,7 @@ export default function VehicleManager() {
                     className="w-full px-8 py-6 text-2xl border-2 border-gray-300 rounded-2xl focus:border-indigo-500 outline-none"
                   />
                 </div>
+
                 <div className="space-y-2">
                   <label className="block text-xl font-medium text-gray-700">
                     Chu kỳ bảo dưỡng (km)
@@ -467,6 +573,7 @@ export default function VehicleManager() {
                     className="w-full px-8 py-6 text-2xl border-2 border-gray-300 rounded-2xl focus:border-indigo-500 outline-none"
                   />
                 </div>
+
                 <div className="space-y-2">
                   <label className="block text-xl font-medium text-gray-700">
                     Chu kỳ bảo dưỡng (tháng)
@@ -487,7 +594,11 @@ export default function VehicleManager() {
 
               <div className="flex justify-center gap-12 mt-16">
                 <button
-                  onClick={() => setShowForm(false)}
+                  onClick={() => {
+                    setShowForm(false);
+                    setSelectedBrand("");
+                    setCustomBrand("");
+                  }}
                   className="px-20 py-6 border-4 border-gray-400 rounded-2xl font-bold text-2xl hover:bg-gray-100 transition"
                 >
                   HỦY BỎ

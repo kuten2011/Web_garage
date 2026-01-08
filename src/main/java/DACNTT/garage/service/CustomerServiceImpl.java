@@ -10,26 +10,26 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Comparator;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @Transactional
 public class CustomerServiceImpl implements CustomerService {
+
     @Autowired
     private CustomerRepository customerRepository;
 
     @Override
     public List<Customer> getAllCustomers() {
-        return customerRepository.findAll();
+        return customerRepository.findAllWithVehicles(); // Load kèm xeList
     }
 
     private String generateCustomerId() {
         String lastId = customerRepository.findAll()
                 .stream()
                 .map(Customer::getMaKH)
-                .filter(id -> id.startsWith("KH"))
-                .max(Comparator.comparingInt(
-                        id -> Integer.parseInt(id.substring(2))
-                ))
+                .filter(id -> id != null && id.startsWith("KH"))
+                .max(Comparator.comparingInt(id -> Integer.parseInt(id.substring(2))))
                 .orElse("KH00");
 
         int nextNumber = Integer.parseInt(lastId.substring(2)) + 1;
@@ -44,11 +44,11 @@ public class CustomerServiceImpl implements CustomerService {
         return customerRepository.existsBySdt(sdt);
     }
 
+    @Override
     public Customer registerCustomer(RegisterRequest request, String encodedPassword) {
         if (isEmailExists(request.getEmail())) {
             throw new RuntimeException("Email đã được sử dụng");
         }
-
         if (isPhoneExists(request.getSdt())) {
             throw new RuntimeException("Số điện thoại đã được sử dụng");
         }
@@ -63,5 +63,30 @@ public class CustomerServiceImpl implements CustomerService {
         customer.setRole(Role.ROLE_CUSTOMER);
 
         return customerRepository.save(customer);
+    }
+
+    @Override
+    public Customer createCustomer(Customer customer) {
+        customer.setMaKH(generateCustomerId());
+        customer.setRole(Role.ROLE_CUSTOMER);
+        return customerRepository.save(customer);
+    }
+
+    @Override
+    public Optional<Customer> getCustomerById(String maKH) {
+        return customerRepository.findById(maKH);
+    }
+
+    @Override
+    public Customer updateCustomer(Customer customer) {
+        return customerRepository.save(customer);
+    }
+
+    @Override
+    public void deleteCustomer(String maKH) {
+        if (!customerRepository.existsById(maKH)) {
+            throw new RuntimeException("Không tìm thấy khách hàng với mã: " + maKH);
+        }
+        customerRepository.deleteById(maKH);
     }
 }

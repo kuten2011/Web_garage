@@ -2,6 +2,7 @@ package DACNTT.garage.handle;
 
 import DACNTT.garage.dto.VehicleDTO;
 import DACNTT.garage.mapper.VehicleMapper;
+import DACNTT.garage.model.Customer;
 import DACNTT.garage.model.Vehicle;
 import DACNTT.garage.repository.CustomerRepository;
 import DACNTT.garage.service.VehicleService;
@@ -87,8 +88,8 @@ public class VehicleHandle {
                 List<Vehicle> filtered = vehicles.getContent().stream()
                         .filter(v ->
                                 v.getBienSo().toLowerCase().contains(s)
-                                        || (v.getMaKH() != null && customerRepository
-                                        .findById(v.getMaKH())
+                                        || (v.getKhachHang().getMaKH() != null && customerRepository
+                                        .findById(v.getKhachHang().getMaKH())
                                         .map(c -> c.getHoTen().toLowerCase().contains(s))
                                         .orElse(false))
                         )
@@ -146,29 +147,43 @@ public class VehicleHandle {
         // Chỉ cập nhật các field có trong updates
         updates.forEach((key, value) -> {
             switch (key) {
-                case "hangXe" -> existing.setHangXe((String) value);
-                case "mauXe" -> existing.setMauXe((String) value);
+                case "maKH" -> {
+                    if (value != null && !value.toString().trim().isEmpty()) {
+                        String newMaKH = value.toString().trim();
+                        // Tạo Customer tạm chỉ có maKH để Hibernate tự load full entity khi save
+                        Customer newCustomer = new Customer();
+                        newCustomer.setMaKH(newMaKH);
+                        existing.setKhachHang(newCustomer);
+                    } else {
+                        throw new IllegalArgumentException("Mã khách hàng không được để trống khi cập nhật");
+                    }
+                }
+                case "hangXe" -> existing.setHangXe(value instanceof String ? (String) value : null);
+                case "mauXe" -> existing.setMauXe(value instanceof String ? (String) value : null);
                 case "soKm" -> existing.setSoKm(value instanceof Integer ? (Integer) value : null);
                 case "namSX" -> existing.setNamSX(value instanceof Integer ? (Integer) value : null);
-                case "ngayBaoHanhDen" -> existing.setNgayBaoHanhDen(value == null ? null : LocalDate.parse((String) value));
-                case "ngayBaoDuongTiepTheo" -> existing.setNgayBaoDuongTiepTheo(value == null ? null : LocalDate.parse((String) value));
-                case "chuKyBaoDuongKm" -> existing.setChuKyBaoDuongKm(value instanceof Integer ? (Integer) value : null);
-                case "chuKyBaoDuongThang" -> existing.setChuKyBaoDuongThang(value instanceof Integer ? (Integer) value : null);
-                // maKH không cho patch vì là dữ liệu quan trọng
+                case "ngayBaoHanhDen" ->
+                        existing.setNgayBaoHanhDen(value == null || value.toString().isEmpty()
+                                ? null : LocalDate.parse(value.toString()));
+                case "ngayBaoDuongTiepTheo" ->
+                        existing.setNgayBaoDuongTiepTheo(value == null || value.toString().isEmpty()
+                                ? null : LocalDate.parse(value.toString()));
+                case "chuKyBaoDuongKm" ->
+                        existing.setChuKyBaoDuongKm(value instanceof Integer ? (Integer) value : null);
+                case "chuKyBaoDuongThang" ->
+                        existing.setChuKyBaoDuongKm(value instanceof Integer ? (Integer) value : null);
+                default -> { /* Bỏ qua field không hợp lệ */ }
             }
         });
 
-        if (updates.containsKey("chuKyBaoDuongThang")) {
-            if (existing.getChuKyBaoDuongThang() != null) {
-                existing.setNgayBaoDuongTiepTheo(
-                        LocalDate.now().plusMonths(existing.getChuKyBaoDuongThang())
-                );
-            }
+        // Tự động cập nhật ngày bảo dưỡng tiếp theo nếu thay đổi chu kỳ tháng
+        if (updates.containsKey("chuKyBaoDuongThang") && existing.getChuKyBaoDuongThang() != null) {
+            existing.setNgayBaoDuongTiepTheo(
+                    LocalDate.now().plusMonths(existing.getChuKyBaoDuongThang())
+            );
         }
 
         Vehicle updated = vehicleService.updateVehicle(bienSo, existing);
         return ResponseEntity.ok(vehicleMapper.toVehicleDTO(updated));
-
-
     }
 }

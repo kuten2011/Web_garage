@@ -1,6 +1,17 @@
 import React, { useState, useEffect } from "react";
 import axiosInstance from "../../api/axiosInstance";
-import { Search, MessageSquare, Star, Car, User, Clock, CheckCircle, Edit3 } from "lucide-react";
+import {
+  Search,
+  MessageSquare,
+  Star,
+  Car,
+  User,
+  Clock,
+  CheckCircle,
+  Edit3,
+  ChevronLeft,
+  ChevronRight,
+} from "lucide-react";
 
 const API = "http://localhost:8080/admin/feedbacks";
 const PAGE_SIZE = 10;
@@ -11,6 +22,7 @@ export default function FeedbackManager() {
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("Tất cả");
+  const [starFilter, setStarFilter] = useState("Tất cả"); // Bộ lọc sao mới
   const [selected, setSelected] = useState(null);
   const [responseText, setResponseText] = useState("");
 
@@ -18,13 +30,24 @@ export default function FeedbackManager() {
     try {
       setLoading(true);
       const params = new URLSearchParams({
-        page: page.toString(),
-        size: PAGE_SIZE.toString(),
-        search: search,
-        trangThai: statusFilter === "Tất cả" ? "" : statusFilter
+        page: "0",
+        size: "1000", 
+        search: search.trim(),
+        trangThai: statusFilter === "Tất cả" ? "" : statusFilter,
       });
       const res = await axiosInstance.get(`${API}?${params}`);
-      setData(res.data);
+      let filtered = res.data.content || res.data || [];
+
+      if (starFilter !== "Tất cả") {
+        filtered = filtered.filter((fb) => fb.soSao === parseInt(starFilter));
+      }
+
+      const pageData = filtered.slice(page * PAGE_SIZE, (page + 1) * PAGE_SIZE);
+      setData({
+        content: pageData,
+        totalPages: Math.ceil(filtered.length / PAGE_SIZE),
+        number: page,
+      });
     } catch (err) {
       alert("Lỗi tải phản hồi!");
     } finally {
@@ -34,7 +57,7 @@ export default function FeedbackManager() {
 
   useEffect(() => {
     fetchData();
-  }, [page, search, statusFilter]);
+  }, [page, search, statusFilter, starFilter]);
 
   const handleSaveResponse = async () => {
     if (!responseText.trim()) return alert("Vui lòng nhập phản hồi!");
@@ -57,7 +80,9 @@ export default function FeedbackManager() {
           <Star
             key={i}
             size={20}
-            className={i <= soSao ? "text-yellow-400 fill-yellow-400" : "text-gray-300"}
+            className={
+              i <= soSao ? "text-yellow-400 fill-yellow-400" : "text-gray-300"
+            }
           />
         ))}
         <span className="ml-2 font-bold text-lg">{soSao}/5</span>
@@ -73,11 +98,14 @@ export default function FeedbackManager() {
           Quản Lý Phản Hồi Khách Hàng
         </h1>
 
-        {/* Bộ lọc */}
+        {/* Bộ lọc – ĐÃ BỔ SUNG LỌC THEO SAO */}
         <div className="bg-white rounded-2xl shadow-lg p-6 mb-8">
-          <div className="flex flex-col md:flex-row gap-4">
-            <div className="flex-1 relative">
-              <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="relative">
+              <Search
+                className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"
+                size={20}
+              />
               <input
                 type="text"
                 placeholder="Tìm theo nội dung, biển số, khách hàng..."
@@ -86,27 +114,49 @@ export default function FeedbackManager() {
                 className="w-full pl-12 pr-6 py-4 border rounded-xl focus:ring-2 focus:ring-indigo-400"
               />
             </div>
+
             <select
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
               className="px-6 py-4 border rounded-xl bg-white font-medium"
             >
-              <option>Tất cả</option>
+              <option>Tất cả trạng thái</option>
               <option>Chưa phản hồi</option>
               <option>Đã phản hồi</option>
+            </select>
+
+            {/* BỘ LỌC THEO SỐ SAO MỚI */}
+            <select
+              value={starFilter}
+              onChange={(e) => setStarFilter(e.target.value)}
+              className="px-6 py-4 border rounded-xl bg-white font-medium flex items-center gap-3"
+            >
+              <option value="Tất cả">Tất cả số sao</option>
+              <option value="5">5 sao</option>
+              <option value="4">4 sao</option>
+              <option value="3">3 sao</option>
+              <option value="2">2 sao</option>
+              <option value="1">1 sao</option>
             </select>
           </div>
         </div>
 
-        {/* Danh sách phản hồi */}
+        {/* Danh sách phản hồi – GIỮ NGUYÊN 100% NHƯ CŨ */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {loading ? (
-            <div className="col-span-full text-center py-20 text-xl text-gray-500">Đang tải...</div>
+            <div className="col-span-full text-center py-20 text-xl text-gray-500">
+              Đang tải...
+            </div>
           ) : data.content.length === 0 ? (
-            <div className="col-span-full text-center py-20 text-xl text-gray-500">Chưa có phản hồi nào</div>
+            <div className="col-span-full text-center py-20 text-xl text-gray-500">
+              Chưa có phản hồi nào
+            </div>
           ) : (
             data.content.map((fb) => (
-              <div key={fb.maPhanHoi} className="bg-white rounded-2xl shadow-xl p-8 hover:shadow-2xl transition">
+              <div
+                key={fb.maPhanHoi}
+                className="bg-white rounded-2xl shadow-xl p-8 hover:shadow-2xl transition"
+              >
                 <div className="flex justify-between items-start mb-6">
                   <div>
                     <div className="flex items-center gap-2 text-gray-600 mb-2">
@@ -115,29 +165,39 @@ export default function FeedbackManager() {
                     </div>
                     <div className="flex items-center gap-2 text-gray-600">
                       <User size={18} />
-                      <span>{fb.hoTenKhach} ({fb.maKH})</span>
+                      <span>
+                        {fb.hoTenKhach} ({fb.maKH})
+                      </span>
                     </div>
                   </div>
                   {renderStars(fb.soSao)}
                 </div>
 
-                <p className="text-gray-700 mb-6 leading-relaxed">{fb.noiDung}</p>
+                <p className="text-gray-700 mb-6 leading-relaxed">
+                  {fb.noiDung}
+                </p>
 
                 <div className="flex justify-between items-center text-sm text-gray-500 mb-4">
                   <div className="flex items-center gap-2">
                     <Clock size={16} />
                     {new Date(fb.ngayGui).toLocaleString("vi-VN")}
                   </div>
-                  <span className={`px-3 py-1 rounded-full text-xs font-bold ${
-                    fb.trangThai === "Đã phản hồi" ? "bg-green-100 text-green-800" : "bg-orange-100 text-orange-800"
-                  }`}>
+                  <span
+                    className={`px-3 py-1 rounded-full text-xs font-bold ${
+                      fb.trangThai === "Đã phản hồi"
+                        ? "bg-green-100 text-green-800"
+                        : "bg-orange-100 text-orange-800"
+                    }`}
+                  >
                     {fb.trangThai}
                   </span>
                 </div>
 
                 {fb.phanHoiQL && (
                   <div className="bg-indigo-50 p-4 rounded-xl mt-4">
-                    <p className="text-indigo-800 font-medium">Phản hồi của garage:</p>
+                    <p className="text-indigo-800 font-medium">
+                      Phản hồi của garage:
+                    </p>
                     <p className="text-indigo-700">{fb.phanHoiQL}</p>
                   </div>
                 )}
@@ -159,22 +219,32 @@ export default function FeedbackManager() {
           )}
         </div>
 
-        {/* Phân trang */}
+        {/* Phân trang – GIỮ NGUYÊN */}
         {data.totalPages > 1 && (
           <div className="flex justify-center gap-3 mt-12">
-            <button onClick={() => setPage(p => Math.max(0, p-1))} disabled={page === 0} className="p-3 rounded-lg bg-white shadow hover:bg-gray-100 disabled:opacity-50">
+            <button
+              onClick={() => setPage((p) => Math.max(0, p - 1))}
+              disabled={page === 0}
+              className="p-3 rounded-lg bg-white shadow hover:bg-gray-100 disabled:opacity-50"
+            >
               <ChevronLeft size={20} />
             </button>
             <span className="px-4 py-2 bg-indigo-600 text-white rounded-lg font-bold">
               Trang {page + 1} / {data.totalPages}
             </span>
-            <button onClick={() => setPage(p => Math.min(data.totalPages - 1, p+1))} disabled={page === data.totalPages - 1} className="p-3 rounded-lg bg-white shadow hover:bg-gray-100 disabled:opacity-50">
+            <button
+              onClick={() =>
+                setPage((p) => Math.min(data.totalPages - 1, p + 1))
+              }
+              disabled={page === data.totalPages - 1}
+              className="p-3 rounded-lg bg-white shadow hover:bg-gray-100 disabled:opacity-50"
+            >
               <ChevronRight size={20} />
             </button>
           </div>
         )}
 
-        {/* Modal trả lời */}
+        {/* Modal trả lời – GIỮ NGUYÊN */}
         {selected && (
           <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-6">
             <div className="bg-white rounded-3xl shadow-2xl p-10 w-full max-w-2xl">
@@ -185,8 +255,12 @@ export default function FeedbackManager() {
               <div className="bg-gray-50 p-6 rounded-2xl mb-8">
                 <div className="flex justify-between mb-4">
                   <div>
-                    <p className="font-bold">{selected.hoTenKhach} - {selected.bienSo}</p>
-                    <p className="text-sm text-gray-600">Phiếu: {selected.maPSC}</p>
+                    <p className="font-bold">
+                      {selected.hoTenKhach} - {selected.bienSo}
+                    </p>
+                    <p className="text-sm text-gray-600">
+                      Phiếu: {selected.maPSC}
+                    </p>
                   </div>
                   {renderStars(selected.soSao)}
                 </div>

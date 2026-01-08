@@ -18,6 +18,8 @@ import { Link } from "react-router-dom";
 
 const API_BASE = "http://localhost:8080/admin";
 const API = `${API_BASE}/repairs`;
+const BOOKING_API = `${API_BASE}/bookings`; // API lấy lịch hẹn
+const EMPLOYEE_API = `${API_BASE}/employees`; // API lấy nhân viên
 const PAGE_SIZE = 10;
 
 export default function RepairManager() {
@@ -29,8 +31,9 @@ export default function RepairManager() {
   const [showForm, setShowForm] = useState(false);
   const [editingItem, setEditingItem] = useState(null);
 
-  // Cache danh sách nhân viên: maNV → { hoTen, tenChiNhanh }
-  const [employees, setEmployees] = useState({});
+  // Dữ liệu dropdown
+  const [bookings, setBookings] = useState([]); // Lịch hẹn
+  const [employees, setEmployees] = useState({}); // maNV → hoTen
 
   const [formData, setFormData] = useState({
     maLich: "",
@@ -41,24 +44,31 @@ export default function RepairManager() {
     bienSo: "",
   });
 
-  // Load danh sách nhân viên khi component mount
+  // Load nhân viên và lịch hẹn ngay khi component mount (không chờ mở form)
   useEffect(() => {
-    const fetchEmployees = async () => {
+    const loadInitialData = async () => {
       try {
-        const res = await axiosInstance.get(`${API_BASE}/employees`);
+        const [bookingRes, employeeRes] = await Promise.all([
+          axiosInstance.get(BOOKING_API),
+          axiosInstance.get(EMPLOYEE_API),
+        ]);
+
+        // Lịch hẹn
+        const bookingList = bookingRes.data.content || bookingRes.data || [];
+        setBookings(bookingList);
+
+        // Nhân viên
         const empMap = {};
-        (res.data.content || res.data).forEach((emp) => {
-          empMap[emp.maNV] = {
-            hoTen: emp.hoTen || "Không tên",
-            maChiNhanh: emp.chiNhanh?.maChiNhanh || "",
-          };
+        (employeeRes.data.content || employeeRes.data || []).forEach((emp) => {
+          empMap[emp.maNV] = emp.hoTen || "Không tên";
         });
         setEmployees(empMap);
       } catch (err) {
-        console.error("Lỗi tải danh sách nhân viên:", err);
+        console.error("Lỗi tải dữ liệu dropdown:", err);
       }
     };
-    fetchEmployees();
+
+    loadInitialData();
   }, []);
 
   const fetchData = async () => {
@@ -148,7 +158,7 @@ export default function RepairManager() {
   };
 
   const handleSave = async () => {
-    if (!formData.maLich.trim()) return alert("Vui lòng nhập mã lịch hẹn!");
+    if (!formData.maLich.trim()) return alert("Vui lòng chọn mã lịch hẹn!");
     if (!formData.bienSo.trim()) return alert("Vui lòng nhập biển số xe!");
 
     try {
@@ -252,13 +262,11 @@ export default function RepairManager() {
                       <td className="px-4 py-4 text-gray-700">
                         {r.maNV && employees[r.maNV] ? (
                           <div>
-                            <div className="font-medium">{employees[r.maNV].hoTen}</div>
-                            <div className="text-xs text-gray-500">
-                              {r.maNV} {employees[r.maNV].maChiNhanh}
-                            </div>
+                            <div className="font-medium">{employees[r.maNV]}</div>
+                            <div className="text-xs text-gray-500">{r.maNV}</div>
                           </div>
                         ) : r.maNV ? (
-                          <span className="text-gray-500 italic">Đang tải...</span>
+                          <span className="text-gray-500 italic">Không tìm thấy</span>
                         ) : (
                           <span className="text-orange-600 font-medium">Chưa phân công</span>
                         )}
@@ -332,7 +340,7 @@ export default function RepairManager() {
           )}
         </div>
 
-        {/* Form thêm/sửa */}
+        {/* POPUP THÊM/SỬA – HOÀN HẢO VỚI DROPDOWN TỪ DB */}
         {showForm && (
           <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4">
             <div className="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-xl">
@@ -349,26 +357,49 @@ export default function RepairManager() {
               )}
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                <input
-                  placeholder="Mã lịch hẹn (VD: LH001) *"
-                  value={formData.maLich}
-                  onChange={(e) => setFormData({ ...formData, maLich: e.target.value })}
-                  className="px-5 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-400 outline-none text-sm"
-                  required
-                />
+                {/* Dropdown lịch hẹn */}
+                <div className="space-y-2">
+                  <label className="block text-sm font-medium text-gray-700">Mã lịch hẹn *</label>
+                  <select
+                    value={formData.maLich}
+                    onChange={(e) => setFormData({ ...formData, maLich: e.target.value })}
+                    className="w-full px-5 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-400 outline-none text-sm"
+                    required
+                  >
+                    <option value="">-- Chọn lịch hẹn --</option>
+                    {bookings.map((bk) => (
+                      <option key={bk.maLich} value={bk.maLich}>
+                        {bk.maLich} - {bk.khachHang?.hoTen || bk.hoTenKH || "Khách lẻ"} - {bk.ngayHen ? new Date(bk.ngayHen).toLocaleDateString("vi-VN") : "N/A"}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                {/* Dropdown nhân viên */}
+                <div className="space-y-2">
+                  <label className="block text-sm font-medium text-gray-700">Nhân viên phụ trách</label>
+                  <select
+                    value={formData.maNV}
+                    onChange={(e) => setFormData({ ...formData, maNV: e.target.value })}
+                    className="w-full px-5 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-400 outline-none text-sm"
+                  >
+                    <option value="">-- Không phân công --</option>
+                    {Object.keys(employees).map((maNV) => (
+                      <option key={maNV} value={maNV}>
+                        {maNV} - {employees[maNV]}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
                 <input
                   placeholder="Biển số xe (VD: 59A1-12345) *"
                   value={formData.bienSo}
-                  onChange={(e) => setFormData({ ...formData, bienSo: e.target.value })}
+                  onChange={(e) => setFormData({ ...formData, bienSo: e.target.value.toUpperCase() })}
                   className="px-5 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-400 outline-none text-sm font-mono"
                   required
                 />
-                <input
-                  placeholder="Mã nhân viên (tùy chọn)"
-                  value={formData.maNV}
-                  onChange={(e) => setFormData({ ...formData, maNV: e.target.value })}
-                  className="px-5 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-400 outline-none text-sm"
-                />
+
                 <input
                   type="date"
                   value={formData.ngayLap}

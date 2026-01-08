@@ -51,22 +51,22 @@ public class CustomerCareScheduler {
         LocalDate warrantySoon = today.plusDays(7);
         List<Vehicle> vehiclesWarranty = vehicleRepository.findByNgayBaoHanhDen(warrantySoon);
         for (Vehicle v : vehiclesWarranty) {
-            emailService.sendWarrantyReminder(customerRepository.findById(v.getMaKH())
-                    .orElseThrow(() -> new RuntimeException("Không tìm thấy khách hàng với mã: " + v.getMaKH())), v);
+            emailService.sendWarrantyReminder(customerRepository.findById(v.getKhachHang().getMaKH())
+                    .orElseThrow(() -> new RuntimeException("Không tìm thấy khách hàng với mã: " + v.getKhachHang().getMaKH())), v);
         }
 
         // 4. Đến chu kỳ bảo dưỡng
         List<Vehicle> dueMaintenance = vehicleRepository.findDueForMaintenance(today);
         for (Vehicle v : dueMaintenance) {
-            emailService.sendMaintenanceReminder(customerRepository.findById(v.getMaKH())
-                    .orElseThrow(() -> new RuntimeException("Không tìm thấy khách hàng với mã: " + v.getMaKH())), v, false);
+            emailService.sendMaintenanceReminder(customerRepository.findById(v.getKhachHang().getMaKH())
+                    .orElseThrow(() -> new RuntimeException("Không tìm thấy khách hàng với mã: " + v.getKhachHang().getMaKH())), v, false);
         }
 
         // 5. Quá hạn bảo dưỡng
         List<Vehicle> overdueMaintenance = vehicleRepository.findOverdueMaintenance(today);
         for (Vehicle v : overdueMaintenance) {
-            emailService.sendMaintenanceReminder(customerRepository.findById(v.getMaKH())
-                    .orElseThrow(() -> new RuntimeException("Không tìm thấy khách hàng với mã: " + v.getMaKH())), v, true);
+            emailService.sendMaintenanceReminder(customerRepository.findById(v.getKhachHang().getMaKH())
+                    .orElseThrow(() -> new RuntimeException("Không tìm thấy khách hàng với mã: " + v.getKhachHang().getMaKH())), v, true);
         }
 
         // 6. Khách ngủ đông (60-90 ngày không quay lại)

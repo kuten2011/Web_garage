@@ -57,7 +57,7 @@ export default function AdminDashboard() {
     setMessage("");
 
     try {
-      const response = await axiosInstance.post("/api/admin/customer-care/run-manually");
+      const response = await axiosInstance.post("/admin/customer-care/run-manually");
       setMessage("✅ " + (response.data.message || "Gửi email chăm sóc khách hàng thành công!"));
     } catch (error) {
       console.error("Lỗi gửi email:", error);

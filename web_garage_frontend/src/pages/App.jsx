@@ -78,7 +78,7 @@ export default function App() {
           <Route path="parts" element={<PartManager />} />
           <Route path="services" element={<ServiceManager />} />
           <Route path="employees" element={<EmployeeManager />} />
-          <Route path="staff" element={<CustomerManager />} />
+          <Route path="customers" element={<CustomerManager />} />
           <Route path="vehicles" element={<VehicleManager />} />
           <Route path="branches" element={<BranchManager />} />
           <Route path="feedbacks" element={<FeedbackManager />} />

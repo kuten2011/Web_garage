@@ -1,5 +1,6 @@
 package DACNTT.garage.service;
 
+import DACNTT.garage.model.Customer;
 import DACNTT.garage.model.Vehicle;
 import DACNTT.garage.repository.CustomerRepository;
 import DACNTT.garage.repository.VehicleRepository;
@@ -57,24 +58,37 @@ public class VehicleServiceImpl implements VehicleService {
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy xe"));
 
         if (!bienSo.equals(updateData.getBienSo())) {
-            throw new RuntimeException("Không được sửa biển số xe!");
+            existing.setBienSo(updateData.getBienSo());
         }
 
-        customerRepository.findById(updateData.getMaKH())
-                .orElseThrow(() -> new RuntimeException("Khách hàng không tồn tại"));
-
-        existing.setHangXe(updateData.getHangXe());
-        existing.setMauXe(updateData.getMauXe());
-        existing.setSoKm(updateData.getSoKm());
-        existing.setNamSX(updateData.getNamSX());
-        existing.setChuKyBaoDuongKm(updateData.getChuKyBaoDuongKm());
-        existing.setChuKyBaoDuongThang(updateData.getChuKyBaoDuongThang());
-
-        // Nếu thay chu kỳ → tính lại hạn bảo dưỡng từ hôm nay
+        if (updateData.getHangXe() != null) {
+            existing.setHangXe(updateData.getHangXe());
+        }
+        if (updateData.getMauXe() != null) {
+            existing.setMauXe(updateData.getMauXe());
+        }
+        if (updateData.getSoKm() != null) {
+            existing.setSoKm(updateData.getSoKm());
+        }
+        if (updateData.getNamSX() != null) {
+            existing.setNamSX(updateData.getNamSX());
+        }
+        if (updateData.getNgayBaoHanhDen() != null) {
+            existing.setNgayBaoHanhDen(updateData.getNgayBaoHanhDen());
+        }
+        if (updateData.getNgayBaoDuongTiepTheo() != null) {
+            existing.setNgayBaoDuongTiepTheo(updateData.getNgayBaoDuongTiepTheo());
+        }
+        if (updateData.getChuKyBaoDuongKm() != null) {
+            existing.setChuKyBaoDuongKm(updateData.getChuKyBaoDuongKm());
+        }
         if (updateData.getChuKyBaoDuongThang() != null) {
-            existing.setNgayBaoDuongTiepTheo(
-                    LocalDate.now().plusMonths(updateData.getChuKyBaoDuongThang())
-            );
+            existing.setChuKyBaoDuongThang(updateData.getChuKyBaoDuongThang());
+        }
+
+        // Sửa lỗi: dùng getKhachHang().getMaKH() thay vì getMaKH()
+        if (updateData.getKhachHang() != null && updateData.getKhachHang().getMaKH() != null) {
+            existing.getKhachHang().setMaKH(updateData.getKhachHang().getMaKH());
         }
 
         return vehicleRepository.save(existing);
@@ -82,9 +96,6 @@ public class VehicleServiceImpl implements VehicleService {
 
     @Override
     public void deleteVehicle(String bienSo) {
-        if (!vehicleRepository.existsById(bienSo)) {
-            throw new RuntimeException("Không tìm thấy xe để xóa!");
-        }
         vehicleRepository.deleteById(bienSo);
     }
 
@@ -128,5 +139,4 @@ public class VehicleServiceImpl implements VehicleService {
     public Page<Vehicle> findByNgayBaoDuongTiepTheoAfter(LocalDate date, Pageable pageable) {
         return vehicleRepository.findByNgayBaoDuongTiepTheoAfter(date, pageable);
     }
-
 }

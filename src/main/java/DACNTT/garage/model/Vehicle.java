@@ -11,12 +11,14 @@ import java.time.LocalDate;
 @NoArgsConstructor
 @AllArgsConstructor
 public class Vehicle {
+
     @Id
     @Column(name = "bienSo", length = 10)
     private String bienSo;
 
-    @Column(name = "maKH", length = 10, nullable = false)
-    private String maKH;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "maKH", nullable = false)
+    private Customer khachHang;
 
     @Column(name = "hangXe", length = 50)
     private String hangXe;

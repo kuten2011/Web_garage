@@ -7,7 +7,7 @@ export default function AboutSection() {
         <div className="flex flex-col md:flex-row items-center gap-10">
           <div className="md:w-1/2">
             <img
-              src="https://images.unsplash.com/photo-1597006345891-fb6e7c593fef?w=900&h=600&fit=crop"
+              src="https://i.imgur.com/Rw8gANO.jpeg"
               alt="Garage"
               className="w-full rounded-2xl shadow-lg"
             />

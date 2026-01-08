@@ -6,6 +6,7 @@ import org.springframework.data.domain.Pageable;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 public interface VehicleService {
@@ -22,5 +23,4 @@ public interface VehicleService {
     Page<Vehicle> findByNgayBaoDuongTiepTheoBetween(LocalDate from, LocalDate to, Pageable pageable);
 
     Page<Vehicle> findByNgayBaoDuongTiepTheoAfter(LocalDate date, Pageable pageable);
-
 }
