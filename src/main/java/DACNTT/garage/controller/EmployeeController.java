@@ -97,4 +97,31 @@ public class EmployeeController {
         employeeService.deleteEmployee(maNV);
         return ResponseEntity.ok("Xóa thành công");
     }
+
+    //Only in UI
+    @GetMapping("/api/{maNV}")
+    public ResponseEntity<EmployeeDTO> getEmployeeByMaNVV(@PathVariable String maNV) {
+        System.out.println("test");
+        return employeeRepository.findByEmail(maNV)
+                .map(employeeMapper::toEmployeeDTO)
+                .map(ResponseEntity::ok)
+                .orElseGet(() -> ResponseEntity.notFound().build());
+    }
+
+    @PatchMapping("/api/{maNV}")
+    public ResponseEntity<EmployeeDTO> updateEmployeeInUi(
+            @PathVariable String maNV,
+            @RequestBody EmployeeDTO dto) {
+        String maNVV = employeeRepository.findByEmail(maNV).get().getMaNV();
+        if (dto.getMaNV() != null && !dto.getMaNV().equals(maNVV)) {
+            return ResponseEntity.badRequest().body(null);
+        }
+        dto.setMaNV(maNVV);
+        try {
+            Employee updated = employeeService.updateEmployee(maNVV, dto);
+            return ResponseEntity.ok(employeeMapper.toEmployeeDTO(updated));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(null);
+        }
+    }
 }

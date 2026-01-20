@@ -66,4 +66,26 @@ public class CustomerController {
         customerHandle.deleteCustomer(maKH);
         return ResponseEntity.noContent().build();
     }
+
+    //Only in UI
+    @GetMapping("/api/customers/api/{maKH}")
+    public ResponseEntity<CustomerDTO> getCustomerByMaKHH(@PathVariable String maKH) {
+        return customerRepository.findByEmail(maKH)
+                .map(customerMapper::toCustomerDTO)
+                .map(ResponseEntity::ok)
+                .orElseGet(() -> ResponseEntity.notFound().build());
+    }
+
+    @PatchMapping("/api/customers/api/{maKH}")
+    public ResponseEntity<CustomerDTO> updateCustomerInUi(
+            @PathVariable String maKH,
+            @RequestBody CustomerDTO customerDTO) {
+        String maKHH = customerRepository.findByEmail(maKH).get().getMaKH();
+        System.out.println(maKHH);
+        if (customerDTO.getMaKH() != null && !customerDTO.getMaKH().equals(maKHH)) {
+            return ResponseEntity.badRequest().body(null); // hoặc throw exception
+        }
+        customerDTO.setMaKH(maKHH);
+        return customerHandle.updateCustomer(customerDTO);
+    }
 }

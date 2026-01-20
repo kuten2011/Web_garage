@@ -17,7 +17,5 @@ public class CustomerDTO {
     private String diaChi;
 
     private List<VehicleDTO> xeList;
-
-    @JsonIgnore
     private String matKhau;
 }
